@@ -6,6 +6,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { getDb } from "./db";
 import { friendsRouter } from "./routers/friends";
+import { exercisesRouter } from "./routers/exercises";
 
 import {
   userProfiles,
@@ -698,6 +699,7 @@ export const appRouter = router({
   gamification: gamificationRouter,
   social: socialRouter,
   friends: friendsRouter,
+  exercises: exercisesRouter,
 });
 
 export type AppRouter = typeof appRouter;

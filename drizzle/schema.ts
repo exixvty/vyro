@@ -289,3 +289,19 @@ export const referralDevices = mysqlTable("referral_devices", {
 
 export type ReferralDevice = typeof referralDevices.$inferSelect;
 export type InsertReferralDevice = typeof referralDevices.$inferInsert;
+
+// ─── Exercises ────────────────────────────────────────────────────────────────
+export const exercises = mysqlTable("exercises", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(),
+  category: mysqlEnum("category", ["chest", "back", "shoulders", "biceps", "triceps", "forearms", "legs", "glutes", "core", "cardio", "functional"]).notNull(),
+  type: mysqlEnum("type", ["compound", "isolation", "cardio", "functional"]).notNull(),
+  difficulty: mysqlEnum("difficulty", ["beginner", "intermediate", "advanced"]).notNull(),
+  equipment: json("equipment").notNull(),
+  description: text("description"),
+  muscleGroups: json("muscleGroups").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Exercise = typeof exercises.$inferSelect;
+export type InsertExercise = typeof exercises.$inferInsert;

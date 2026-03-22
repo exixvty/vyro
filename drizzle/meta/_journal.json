@@ -36,6 +36,13 @@
       "when": 1774202130137,
       "tag": "0004_zippy_fenris",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1774202881299,
+      "tag": "0005_loose_wallow",
+      "breakpoints": true
     }
   ]
 }

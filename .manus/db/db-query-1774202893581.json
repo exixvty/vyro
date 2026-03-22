@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `exercises` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`name` varchar(255) NOT NULL,\n\t`category` enum('chest','back','shoulders','biceps','triceps','forearms','legs','glutes','core','cardio','functional') NOT NULL,\n\t`type` enum('compound','isolation','cardio','functional') NOT NULL,\n\t`difficulty` enum('beginner','intermediate','advanced') NOT NULL,\n\t`equipment` json NOT NULL,\n\t`description` text,\n\t`muscleGroups` json NOT NULL,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `exercises_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `exercises_name_unique` UNIQUE(`name`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3SJBdNXrBo7A2K3.root --database ABaDZShuwigi7srSSPoYho --execute CREATE TABLE `exercises` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`name` varchar(255) NOT NULL,\n\t`category` enum('chest','back','shoulders','biceps','triceps','forearms','legs','glutes','core','cardio','functional') NOT NULL,\n\t`type` enum('compound','isolation','cardio','functional') NOT NULL,\n\t`difficulty` enum('beginner','intermediate','advanced') NOT NULL,\n\t`equipment` json NOT NULL,\n\t`description` text,\n\t`muscleGroups` json NOT NULL,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `exercises_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `exercises_name_unique` UNIQUE(`name`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1778
+}

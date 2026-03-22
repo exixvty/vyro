@@ -1,34 +1,23 @@
 import { useState, useMemo } from "react";
-import { Search, BookOpen, ChevronRight, Star, Filter } from "lucide-react";
+import { Search, BookOpen, ChevronRight, Star, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const EXERCISES = [
-  { id: 1, name: "Bench Press", muscle: "chest", equipment: "barbell", difficulty: "intermediate", desc: "Lie on a flat bench, grip the barbell slightly wider than shoulder-width. Lower to chest, press up explosively.", tips: "Keep shoulder blades retracted. Don't bounce the bar off your chest.", sets: "3-5", reps: "5-12" },
-  { id: 2, name: "Squat", muscle: "legs", equipment: "barbell", difficulty: "intermediate", desc: "Stand with feet shoulder-width apart, barbell on upper back. Squat until thighs are parallel to floor.", tips: "Keep chest up, knees tracking over toes. Drive through heels.", sets: "3-5", reps: "5-10" },
-  { id: 3, name: "Deadlift", muscle: "back", equipment: "barbell", difficulty: "advanced", desc: "Stand over barbell, hip-width stance. Hinge at hips, grip bar, drive through floor to stand.", tips: "Maintain neutral spine. Bar stays close to body throughout.", sets: "3-5", reps: "3-8" },
-  { id: 4, name: "Pull-Up", muscle: "back", equipment: "bodyweight", difficulty: "intermediate", desc: "Hang from bar with overhand grip. Pull chest to bar, lower with control.", tips: "Engage lats before pulling. Avoid swinging.", sets: "3-4", reps: "5-12" },
-  { id: 5, name: "Overhead Press", muscle: "shoulders", equipment: "barbell", difficulty: "intermediate", desc: "Stand with barbell at shoulder height. Press overhead until arms are locked out.", tips: "Squeeze glutes and core. Don't hyperextend lower back.", sets: "3-4", reps: "6-10" },
-  { id: 6, name: "Dumbbell Row", muscle: "back", equipment: "dumbbell", difficulty: "beginner", desc: "Brace on bench with one hand. Pull dumbbell to hip, elbow close to body.", tips: "Full range of motion. Squeeze at top.", sets: "3-4", reps: "8-15" },
-  { id: 7, name: "Dips", muscle: "chest", equipment: "bodyweight", difficulty: "intermediate", desc: "Grip parallel bars, lower body until elbows at 90°, press back up.", tips: "Lean forward for chest emphasis, upright for triceps.", sets: "3-4", reps: "8-15" },
-  { id: 8, name: "Bicep Curl", muscle: "arms", equipment: "dumbbell", difficulty: "beginner", desc: "Stand with dumbbells at sides, curl to shoulder height keeping elbows fixed.", tips: "Don't swing. Full extension at bottom.", sets: "3-4", reps: "10-15" },
-  { id: 9, name: "Tricep Pushdown", muscle: "arms", equipment: "cable", difficulty: "beginner", desc: "Stand at cable machine, push bar down until arms fully extended.", tips: "Keep elbows at sides. Squeeze at bottom.", sets: "3-4", reps: "12-15" },
-  { id: 10, name: "Plank", muscle: "core", equipment: "bodyweight", difficulty: "beginner", desc: "Hold push-up position with forearms on ground. Keep body straight.", tips: "Don't let hips sag or rise. Breathe steadily.", sets: "3", reps: "30-60s" },
-  { id: 11, name: "Running", muscle: "cardio", equipment: "none", difficulty: "beginner", desc: "Steady-state or interval running for cardiovascular fitness.", tips: "Land midfoot. Maintain upright posture.", sets: "1", reps: "20-60min" },
-  { id: 12, name: "Box Jump", muscle: "legs", equipment: "box", difficulty: "intermediate", desc: "Stand before box, swing arms and jump onto it, land softly.", tips: "Land with bent knees. Step down, don't jump down.", sets: "3-4", reps: "5-8" },
-  { id: 13, name: "Romanian Deadlift", muscle: "legs", equipment: "barbell", difficulty: "intermediate", desc: "Hold barbell, hinge at hips keeping legs nearly straight, lower to mid-shin.", tips: "Feel hamstring stretch. Keep bar close to legs.", sets: "3-4", reps: "8-12" },
-  { id: 14, name: "Lateral Raise", muscle: "shoulders", equipment: "dumbbell", difficulty: "beginner", desc: "Stand with dumbbells at sides, raise arms out to shoulder height.", tips: "Slight bend in elbows. Don't shrug.", sets: "3-4", reps: "12-20" },
-  { id: 15, name: "Cable Fly", muscle: "chest", equipment: "cable", difficulty: "intermediate", desc: "Set cables at shoulder height, step forward and bring handles together.", tips: "Slight bend in elbows throughout. Squeeze chest at center.", sets: "3-4", reps: "12-15" },
-  { id: 16, name: "Hip Thrust", muscle: "legs", equipment: "barbell", difficulty: "intermediate", desc: "Sit with upper back on bench, barbell on hips. Drive hips up to full extension.", tips: "Squeeze glutes at top. Chin tucked.", sets: "3-4", reps: "10-15" },
-  { id: 17, name: "Face Pull", muscle: "shoulders", equipment: "cable", difficulty: "beginner", desc: "Pull cable rope to face level, elbows high and wide.", tips: "External rotation at end. Great for shoulder health.", sets: "3-4", reps: "15-20" },
-  { id: 18, name: "Leg Press", muscle: "legs", equipment: "machine", difficulty: "beginner", desc: "Sit in machine, feet on platform. Press weight away, lower with control.", tips: "Don't lock knees. Full range of motion.", sets: "3-4", reps: "10-15" },
-];
-
-const MUSCLES = ["all", "chest", "back", "shoulders", "arms", "legs", "core", "cardio"];
-const DIFFICULTIES = ["all", "beginner", "intermediate", "advanced"];
-const EQUIPMENT_LIST = ["all", "barbell", "dumbbell", "bodyweight", "cable", "machine", "none"];
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 
 const MUSCLE_ICONS: Record<string, string> = {
-  chest: "💪", back: "🔙", shoulders: "🏋️", arms: "💪", legs: "🦵", core: "⚡", cardio: "❤️",
+  chest: "💪",
+  back: "🔙",
+  shoulders: "🏋️",
+  biceps: "💪",
+  triceps: "💪",
+  forearms: "🤝",
+  legs: "🦵",
+  glutes: "🍑",
+  core: "⚡",
+  cardio: "❤️",
+  functional: "🎯",
 };
 
 const DIFF_COLORS: Record<string, string> = {
@@ -39,168 +28,357 @@ const DIFF_COLORS: Record<string, string> = {
 
 export default function Library() {
   const [search, setSearch] = useState("");
-  const [muscle, setMuscle] = useState("all");
+  const [category, setCategory] = useState("all");
   const [difficulty, setDifficulty] = useState("all");
+  const [type, setType] = useState("all");
   const [equipment, setEquipment] = useState("all");
-  const [selected, setSelected] = useState<(typeof EXERCISES)[0] | null>(null);
+  const [selected, setSelected] = useState<any | null>(null);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
 
+  // Fetch all exercises
+  const { data: allExercises = [], isLoading } = trpc.exercises.getAll.useQuery();
+
+  // Fetch categories, muscle groups, equipment
+  const { data: categories = [] } = trpc.exercises.getCategories.useQuery();
+  const { data: muscleGroups = [] } = trpc.exercises.getMuscleGroups.useQuery();
+  const { data: equipmentList = [] } = trpc.exercises.getEquipment.useQuery();
+
   const filtered = useMemo(() => {
-    return EXERCISES.filter((ex) => {
-      const matchSearch = !search || ex.name.toLowerCase().includes(search.toLowerCase());
-      const matchMuscle = muscle === "all" || ex.muscle === muscle;
-      const matchDiff = difficulty === "all" || ex.difficulty === difficulty;
-      const matchEquip = equipment === "all" || ex.equipment === equipment;
-      return matchSearch && matchMuscle && matchDiff && matchEquip;
-    });
-  }, [search, muscle, difficulty, equipment]);
+    let results = allExercises;
+
+    // Search by name
+    if (search) {
+      results = results.filter((ex) => ex.name.toLowerCase().includes(search.toLowerCase()));
+    }
+
+    // Filter by category
+    if (category !== "all") {
+      results = results.filter((ex) => ex.category === category);
+    }
+
+    // Filter by difficulty
+    if (difficulty !== "all") {
+      results = results.filter((ex) => ex.difficulty === difficulty);
+    }
+
+    // Filter by type
+    if (type !== "all") {
+      results = results.filter((ex) => ex.type === type);
+    }
+
+    // Filter by equipment
+    if (equipment !== "all") {
+      results = results.filter((ex) => {
+        const exEquip = JSON.parse(ex.equipment as string);
+        return exEquip.includes(equipment);
+      });
+    }
+
+    return results;
+  }, [allExercises, search, category, difficulty, type, equipment]);
 
   const toggleFavorite = (id: number) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
+    const newFavs = new Set(favorites);
+    if (newFavs.has(id)) {
+      newFavs.delete(id);
+    } else {
+      newFavs.add(id);
+    }
+    setFavorites(newFavs);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="animate-spin text-violet-500" size={40} />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground pb-24">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4">
-        <h1 className="text-2xl font-display font-bold text-foreground mb-1">Exercise Library</h1>
-        <p className="text-muted-foreground text-sm">{EXERCISES.length} exercises with instructions</p>
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <BookOpen className="text-violet-500" size={24} />
+          <h1 className="text-2xl font-bold">Exercise Library</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">{filtered.length} exercises</p>
       </div>
 
       {/* Search */}
-      <div className="px-5 mb-4">
+      <div className="p-4 space-y-3">
         <div className="relative">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
+          <Search className="absolute left-3 top-3 text-muted-foreground" size={18} />
+          <Input
             placeholder="Search exercises..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-12 pl-10 pr-4 rounded-2xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="pl-10 bg-muted border-border"
           />
         </div>
-      </div>
 
-      {/* Muscle filter */}
-      <div className="px-5 mb-3">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-          {MUSCLES.map((m) => (
-            <button key={m} onClick={() => setMuscle(m)}
-              className={cn("shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border capitalize transition-all",
-                muscle === m ? "bg-primary/10 border-primary text-primary" : "border-border text-muted-foreground bg-card")}>
-              {m !== "all" && <span>{MUSCLE_ICONS[m]}</span>}
-              {m}
+        {/* Filters */}
+        <div className="space-y-2">
+          <div className="text-xs font-semibold text-muted-foreground">CATEGORY</div>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            <button
+              onClick={() => setCategory("all")}
+              className={cn(
+                "px-3 py-1 rounded-full text-sm whitespace-nowrap transition",
+                category === "all"
+                  ? "bg-violet-500 text-white"
+                  : "bg-muted text-foreground hover:bg-muted/80"
+              )}
+            >
+              All
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Difficulty + Equipment filters */}
-      <div className="px-5 mb-4 flex gap-2">
-        <div className="flex gap-1 overflow-x-auto scrollbar-hide flex-1">
-          {DIFFICULTIES.map((d) => (
-            <button key={d} onClick={() => setDifficulty(d)}
-              className={cn("shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-medium border capitalize transition-all",
-                difficulty === d ? "bg-primary/10 border-primary text-primary" : "border-border text-muted-foreground")}>
-              {d}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Results count */}
-      <div className="px-5 mb-3">
-        <p className="text-xs text-muted-foreground">{filtered.length} exercises</p>
-      </div>
-
-      {/* Exercise list */}
-      <div className="px-5 space-y-2 pb-6">
-        {filtered.map((exercise) => (
-          <button key={exercise.id} onClick={() => setSelected(exercise)}
-            className="w-full flex items-center gap-3 p-4 bg-card border border-border rounded-2xl text-left transition-all hover:border-primary/30">
-            <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center text-xl shrink-0">
-              {MUSCLE_ICONS[exercise.muscle] || "💪"}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <p className="font-semibold text-sm text-foreground">{exercise.name}</p>
-                <span className={cn("text-[10px] px-1.5 py-0.5 rounded-md font-medium capitalize", DIFF_COLORS[exercise.difficulty])}>
-                  {exercise.difficulty}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground capitalize">{exercise.muscle} · {exercise.equipment}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button onClick={(e) => { e.stopPropagation(); toggleFavorite(exercise.id); }}
-                className="p-1">
-                <Star size={16} className={favorites.has(exercise.id) ? "text-yellow-400" : "text-muted-foreground"}
-                  fill={favorites.has(exercise.id) ? "currentColor" : "none"} />
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategory(cat)}
+                className={cn(
+                  "px-3 py-1 rounded-full text-sm whitespace-nowrap transition capitalize",
+                  category === cat
+                    ? "bg-violet-500 text-white"
+                    : "bg-muted text-foreground hover:bg-muted/80"
+                )}
+              >
+                {cat}
               </button>
-              <ChevronRight size={16} className="text-muted-foreground" />
-            </div>
-          </button>
-        ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Type Filter */}
+        <div className="space-y-2">
+          <div className="text-xs font-semibold text-muted-foreground">TYPE</div>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            <button
+              onClick={() => setType("all")}
+              className={cn(
+                "px-3 py-1 rounded-full text-sm whitespace-nowrap transition",
+                type === "all"
+                  ? "bg-violet-500 text-white"
+                  : "bg-muted text-foreground hover:bg-muted/80"
+              )}
+            >
+              All
+            </button>
+            {["compound", "isolation", "cardio", "functional"].map((t) => (
+              <button
+                key={t}
+                onClick={() => setType(t)}
+                className={cn(
+                  "px-3 py-1 rounded-full text-sm whitespace-nowrap transition capitalize",
+                  type === t
+                    ? "bg-violet-500 text-white"
+                    : "bg-muted text-foreground hover:bg-muted/80"
+                )}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Difficulty Filter */}
+        <div className="space-y-2">
+          <div className="text-xs font-semibold text-muted-foreground">DIFFICULTY</div>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            <button
+              onClick={() => setDifficulty("all")}
+              className={cn(
+                "px-3 py-1 rounded-full text-sm whitespace-nowrap transition",
+                difficulty === "all"
+                  ? "bg-violet-500 text-white"
+                  : "bg-muted text-foreground hover:bg-muted/80"
+              )}
+            >
+              All
+            </button>
+            {["beginner", "intermediate", "advanced"].map((d) => (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className={cn(
+                  "px-3 py-1 rounded-full text-sm whitespace-nowrap transition capitalize",
+                  difficulty === d
+                    ? "bg-violet-500 text-white"
+                    : "bg-muted text-foreground hover:bg-muted/80"
+                )}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Equipment Filter */}
+        <div className="space-y-2">
+          <div className="text-xs font-semibold text-muted-foreground">EQUIPMENT</div>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            <button
+              onClick={() => setEquipment("all")}
+              className={cn(
+                "px-3 py-1 rounded-full text-sm whitespace-nowrap transition",
+                equipment === "all"
+                  ? "bg-violet-500 text-white"
+                  : "bg-muted text-foreground hover:bg-muted/80"
+              )}
+            >
+              All
+            </button>
+            {equipmentList.map((eq) => (
+              <button
+                key={eq}
+                onClick={() => setEquipment(eq)}
+                className={cn(
+                  "px-3 py-1 rounded-full text-sm whitespace-nowrap transition capitalize",
+                  equipment === eq
+                    ? "bg-violet-500 text-white"
+                    : "bg-muted text-foreground hover:bg-muted/80"
+                )}
+              >
+                {eq}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Exercise detail modal */}
-      {selected && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end max-w-[430px] mx-auto">
-          <div className="w-full bg-card border-t border-border rounded-t-3xl p-6 animate-slide-up max-h-[85vh] overflow-y-auto">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center text-2xl">
-                  {MUSCLE_ICONS[selected.muscle] || "💪"}
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-xl text-foreground">{selected.name}</h3>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className={cn("text-xs px-2 py-0.5 rounded-md font-medium capitalize", DIFF_COLORS[selected.difficulty])}>
-                      {selected.difficulty}
+      {/* Exercise List */}
+      <div className="p-4 space-y-2">
+        {filtered.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No exercises found</p>
+          </div>
+        ) : (
+          filtered.map((exercise) => (
+            <button
+              key={exercise.id}
+              onClick={() => setSelected(exercise)}
+              className="w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition text-left border border-border"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">{MUSCLE_ICONS[exercise.category] || "💪"}</span>
+                    <h3 className="font-semibold">{exercise.name}</h3>
+                    <span className={cn("text-xs px-2 py-0.5 rounded-full", DIFF_COLORS[exercise.difficulty])}>
+                      {exercise.difficulty}
                     </span>
-                    <span className="text-xs text-muted-foreground capitalize">{selected.muscle}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground space-x-2">
+                    <span className="capitalize">{exercise.type}</span>
+                    <span>•</span>
+                    <span>{JSON.parse(exercise.equipment as string).join(", ")}</span>
                   </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(exercise.id);
+                    }}
+                    className="p-2 hover:bg-background rounded-lg transition"
+                  >
+                    <Star
+                      size={18}
+                      className={favorites.has(exercise.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}
+                    />
+                  </button>
+                  <ChevronRight className="text-muted-foreground" size={20} />
+                </div>
               </div>
-              <button onClick={() => setSelected(null)} className="text-muted-foreground">✕</button>
+            </button>
+          ))
+        )}
+      </div>
+
+      {/* Detail Modal */}
+      {selected && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur flex items-end">
+          <div className="w-full bg-background rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-3xl">{MUSCLE_ICONS[selected.category] || "💪"}</span>
+                <div>
+                  <h2 className="text-2xl font-bold">{selected.name}</h2>
+                  <p className="text-sm text-muted-foreground capitalize">{selected.category}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelected(null)}
+                className="p-2 hover:bg-muted rounded-lg transition"
+              >
+                <X size={24} />
+              </button>
             </div>
 
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { label: "Sets", value: selected.sets },
-                  { label: "Reps", value: selected.reps },
-                  { label: "Equipment", value: selected.equipment },
-                ].map(({ label, value }) => (
-                  <div key={label} className="bg-muted rounded-xl p-3 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">{label}</p>
-                    <p className="text-sm font-semibold text-foreground capitalize">{value}</p>
-                  </div>
-                ))}
-              </div>
-
+              {/* Description */}
               <div>
-                <h4 className="font-semibold text-sm mb-2 text-foreground">How to perform</h4>
-                <p className="text-sm text-muted-foreground leading-relaxed">{selected.desc}</p>
+                <h3 className="font-semibold mb-2">Description</h3>
+                <p className="text-sm text-muted-foreground">{selected.description}</p>
               </div>
 
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
-                <h4 className="font-semibold text-sm mb-2 text-primary">Pro Tips</h4>
-                <p className="text-sm text-muted-foreground leading-relaxed">{selected.tips}</p>
+              {/* Details */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground mb-1">Type</p>
+                  <p className="font-semibold capitalize text-sm">{selected.type}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground mb-1">Difficulty</p>
+                  <p className={cn("font-semibold text-sm capitalize", DIFF_COLORS[selected.difficulty])}>
+                    {selected.difficulty}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground mb-1">Equipment</p>
+                  <p className="font-semibold text-sm">{JSON.parse(selected.equipment as string).length}</p>
+                </div>
               </div>
 
-              <button
-                onClick={() => toggleFavorite(selected.id)}
-                className={cn("w-full h-12 rounded-xl border font-medium text-sm flex items-center justify-center gap-2 transition-all",
-                  favorites.has(selected.id)
-                    ? "bg-yellow-400/10 border-yellow-400/30 text-yellow-400"
-                    : "border-border text-muted-foreground")}
-              >
-                <Star size={16} fill={favorites.has(selected.id) ? "currentColor" : "none"} />
-                {favorites.has(selected.id) ? "Saved to Favorites" : "Save to Favorites"}
-              </button>
+              {/* Equipment */}
+              <div>
+                <h3 className="font-semibold mb-2">Equipment</h3>
+                <div className="flex flex-wrap gap-2">
+                  {JSON.parse(selected.equipment as string).map((eq: string) => (
+                    <span key={eq} className="px-3 py-1 rounded-full bg-violet-500/20 text-violet-400 text-sm capitalize">
+                      {eq}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Muscle Groups */}
+              <div>
+                <h3 className="font-semibold mb-2">Muscle Groups</h3>
+                <div className="flex flex-wrap gap-2">
+                  {JSON.parse(selected.muscleGroups as string).map((muscle: string) => (
+                    <span key={muscle} className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-sm capitalize">
+                      {muscle}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-4">
+                <Button
+                  onClick={() => toggleFavorite(selected.id)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Star size={18} className="mr-2" />
+                  {favorites.has(selected.id) ? "Favorited" : "Favorite"}
+                </Button>
+                <Button className="flex-1 bg-violet-500 hover:bg-violet-600">
+                  Add to Workout
+                </Button>
+              </div>
             </div>
           </div>
         </div>
