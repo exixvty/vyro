@@ -305,3 +305,37 @@ export const exercises = mysqlTable("exercises", {
 
 export type Exercise = typeof exercises.$inferSelect;
 export type InsertExercise = typeof exercises.$inferInsert;
+
+// ─── Workout Exercise Logs ────────────────────────────────────────────────
+export const workoutExerciseLogs = mysqlTable("workout_exercise_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  workoutSessionId: int("workoutSessionId").notNull(),
+  exerciseId: int("exerciseId").notNull(),
+  order: int("order").notNull(), // order in the workout
+  superset: int("superset"), // superset group ID (null if not in superset)
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WorkoutExerciseLog = typeof workoutExerciseLogs.$inferSelect;
+export type InsertWorkoutExerciseLog = typeof workoutExerciseLogs.$inferInsert;
+
+// ─── Workout Sets ─────────────────────────────────────────────────────────────
+export const workoutSets = mysqlTable("workout_sets", {
+  id: int("id").autoincrement().primaryKey(),
+  workoutExerciseLogId: int("workoutExerciseLogId").notNull(),
+  setNumber: int("setNumber").notNull(),
+  reps: int("reps"),
+  weight: float("weight"), // in kg
+  weightUnit: mysqlEnum("weightUnit", ["kg", "lbs"]).default("kg").notNull(),
+  duration: int("duration"), // in seconds (for cardio/timed exercises)
+  distance: float("distance"), // in km/miles
+  distanceUnit: mysqlEnum("distanceUnit", ["km", "miles"]).default("km").notNull(),
+  rpe: int("rpe"), // Rate of Perceived Exertion (1-10)
+  notes: text("notes"),
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WorkoutSet = typeof workoutSets.$inferSelect;
+export type InsertWorkoutSet = typeof workoutSets.$inferInsert;

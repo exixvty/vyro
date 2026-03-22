@@ -7,6 +7,7 @@ import { invokeLLM } from "./_core/llm";
 import { getDb } from "./db";
 import { friendsRouter } from "./routers/friends";
 import { exercisesRouter } from "./routers/exercises";
+import { workoutsRouter } from "./routers/workouts";
 
 import {
   userProfiles,
@@ -700,6 +701,7 @@ export const appRouter = router({
   social: socialRouter,
   friends: friendsRouter,
   exercises: exercisesRouter,
+  workouts: workoutsRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -43,6 +43,13 @@
       "when": 1774202881299,
       "tag": "0005_loose_wallow",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1774204738802,
+      "tag": "0006_round_frightful_four",
+      "breakpoints": true
     }
   ]
 }

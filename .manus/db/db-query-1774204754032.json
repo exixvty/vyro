@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `workout_exercise_logs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`workoutSessionId` int NOT NULL,\n\t`exerciseId` int NOT NULL,\n\t`order` int NOT NULL,\n\t`superset` int,\n\t`notes` text,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `workout_exercise_logs_id` PRIMARY KEY(`id`)\n);\nCREATE TABLE `workout_sets` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`workoutExerciseLogId` int NOT NULL,\n\t`setNumber` int NOT NULL,\n\t`reps` int,\n\t`weight` float,\n\t`weightUnit` enum('kg','lbs') NOT NULL DEFAULT 'kg',\n\t`duration` int,\n\t`distance` float,\n\t`distanceUnit` enum('km','miles') NOT NULL DEFAULT 'km',\n\t`rpe` int,\n\t`notes` text,\n\t`completedAt` timestamp,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `workout_sets_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3SJBdNXrBo7A2K3.root --database ABaDZShuwigi7srSSPoYho --execute CREATE TABLE `workout_exercise_logs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`workoutSessionId` int NOT NULL,\n\t`exerciseId` int NOT NULL,\n\t`order` int NOT NULL,\n\t`superset` int,\n\t`notes` text,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `workout_exercise_logs_id` PRIMARY KEY(`id`)\n);\nCREATE TABLE `workout_sets` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`workoutExerciseLogId` int NOT NULL,\n\t`setNumber` int NOT NULL,\n\t`reps` int,\n\t`weight` float,\n\t`weightUnit` enum('kg','lbs') NOT NULL DEFAULT 'kg',\n\t`duration` int,\n\t`distance` float,\n\t`distanceUnit` enum('km','miles') NOT NULL DEFAULT 'km',\n\t`rpe` int,\n\t`notes` text,\n\t`completedAt` timestamp,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `workout_sets_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 2515
+}

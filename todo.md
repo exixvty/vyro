@@ -94,3 +94,14 @@
 - [x] Favorite exercises feature with persistent state
 - [x] Add to Workout button (ready for workout integration)
 - [x] All tests passing (11/11), zero TypeScript errors
+
+
+## Phase 13: Professional Workout Logging System (Arrow/Liftoff/Hevy Inspired)
+- [ ] Update schema: workout sessions, exercise logs, sets with reps/weight/time, supersets
+- [ ] Build workout routers: create session, add exercise, log set, manage supersets
+- [ ] Enhanced Workout page: exercise search/selection, set-by-set logging interface
+- [ ] Metric system selection: kg/lbs for weight, reps/time for cardio
+- [ ] Supersets support: group exercises, alternate between them
+- [ ] Library integration: add-to-workout from Library page
+- [ ] Workout history and session completion
+- [ ] Test full workout logging workflow
