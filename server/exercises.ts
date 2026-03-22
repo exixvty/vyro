@@ -12,6 +12,7 @@ export interface Exercise {
   equipment: string[];
   description: string;
   muscleGroups: string[];
+  videoUrl?: string;
 }
 
 export const EXERCISES: Exercise[] = [
