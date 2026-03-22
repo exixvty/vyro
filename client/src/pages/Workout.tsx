@@ -21,9 +21,30 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useLocation } from "wouter";
 import { ReferralPrompt } from "@/components/ReferralPrompt";
 
-type Tab = "generate" | "quick" | "history";
+type Tab = "generate" | "quick" | "custom" | "history";
+
+
+function CustomWorkout() {
+  const [, navigate] = useLocation();
+  return (
+    <div className="px-5 space-y-5 pb-6">
+      <div className="bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-500/30 rounded-2xl p-6 space-y-4">
+        <h3 className="text-lg font-semibold text-foreground">Build Your Own Workout</h3>
+        <p className="text-sm text-muted-foreground">Choose exercises from our library of 443+ movements and customize sets, reps, and weight for each exercise.</p>
+        <button
+          onClick={() => navigate('/workout/builder')}
+          className="w-full h-12 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
+        >
+          <Plus size={18} />
+          Create Custom Workout
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function Workout() {
   const [activeTab, setActiveTab] = useState<Tab>("generate");
@@ -42,7 +63,7 @@ export default function Workout() {
       {/* Tabs */}
       <div className="px-5 mb-5">
         <div className="flex gap-1 p-1 bg-muted rounded-xl">
-          {(["generate", "quick", "history"] as Tab[]).map((tab) => (
+          {(["generate", "quick", "custom", "history"] as Tab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -51,7 +72,7 @@ export default function Workout() {
                 activeTab === tab ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
               )}
             >
-              {tab === "generate" ? "AI Plan" : tab === "quick" ? "Quick" : "History"}
+              {tab === "generate" ? "AI Plan" : tab === "quick" ? "Quick" : tab === "custom" ? "Custom" : "History"}
             </button>
           ))}
         </div>
@@ -62,6 +83,9 @@ export default function Workout() {
       )}
       {activeTab === "quick" && (
         <QuickWorkout onStart={(workout) => { setActiveWorkout(workout); setShowActiveWorkout(true); }} />
+      )}
+      {activeTab === "custom" && (
+        <CustomWorkout />
       )}
       {activeTab === "history" && <WorkoutHistory />}
 

@@ -105,3 +105,13 @@
 - [ ] Library integration: add-to-workout from Library page
 - [ ] Workout history and session completion
 - [ ] Test full workout logging workflow
+
+## Phase 14: Professional Workout UI (Manual Exercise Selection - Arrow/Liftoff/Hevy Style)
+- [ ] WorkoutBuilder page: name workout, search and add exercises from 443 library
+- [ ] Exercise customization: sets, reps, weight, rest time, notes per exercise
+- [ ] Drag-to-reorder exercises in workout plan
+- [ ] Active workout session UI with live logging
+- [ ] Set completion tracking with weight/reps input
+- [ ] Rest timer between sets with audio alert
+- [ ] Workout summary and completion screen
+- [ ] Save custom workout templates for reuse

@@ -20,6 +20,7 @@ import Settings from "./pages/Settings";
 import Premium from "./pages/Premium";
 import Referral from "./pages/Referral";
 import Friends from "./pages/Friends";
+import WorkoutBuilder from "./pages/WorkoutBuilder";
 import AppLayout from "./components/AppLayout";
 
 function Router() {
@@ -32,6 +33,9 @@ function Router() {
       </Route>
       <Route path="/workout">
         <AppLayout><Workout /></AppLayout>
+      </Route>
+      <Route path="/workout/builder">
+        <AppLayout><WorkoutBuilder /></AppLayout>
       </Route>
       <Route path="/nutrition">
         <AppLayout><Nutrition /></AppLayout>
