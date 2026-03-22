@@ -4,36 +4,74 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { VyroThemeProvider } from "./contexts/VyroThemeContext";
 import Home from "./pages/Home";
+import Onboarding from "./pages/Onboarding";
+import Dashboard from "./pages/Dashboard";
+import Workout from "./pages/Workout";
+import Nutrition from "./pages/Nutrition";
+import Progress from "./pages/Progress";
+import Habits from "./pages/Habits";
+import Library from "./pages/Library";
+import Gamification from "./pages/Gamification";
+import Social from "./pages/Social";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+import Premium from "./pages/Premium";
+import AppLayout from "./components/AppLayout";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      <Route path="/" component={Home} />
+      <Route path="/onboarding" component={Onboarding} />
+      <Route path="/dashboard">
+        <AppLayout><Dashboard /></AppLayout>
+      </Route>
+      <Route path="/workout">
+        <AppLayout><Workout /></AppLayout>
+      </Route>
+      <Route path="/nutrition">
+        <AppLayout><Nutrition /></AppLayout>
+      </Route>
+      <Route path="/progress">
+        <AppLayout><Progress /></AppLayout>
+      </Route>
+      <Route path="/habits">
+        <AppLayout><Habits /></AppLayout>
+      </Route>
+      <Route path="/library">
+        <AppLayout><Library /></AppLayout>
+      </Route>
+      <Route path="/gamification">
+        <AppLayout><Gamification /></AppLayout>
+      </Route>
+      <Route path="/social">
+        <AppLayout><Social /></AppLayout>
+      </Route>
+      <Route path="/profile">
+        <AppLayout><Profile /></AppLayout>
+      </Route>
+      <Route path="/settings">
+        <AppLayout><Settings /></AppLayout>
+      </Route>
+      <Route path="/premium" component={Premium} />
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+      <ThemeProvider defaultTheme="dark" switchable>
+        <VyroThemeProvider>
+          <TooltipProvider>
+            <Toaster position="top-center" richColors />
+            <Router />
+          </TooltipProvider>
+        </VyroThemeProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
