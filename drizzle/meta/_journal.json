@@ -15,6 +15,27 @@
       "when": 1774180611141,
       "tag": "0001_brief_nicolaos",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1774201786185,
+      "tag": "0002_minor_jamie_braddock",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1774201932955,
+      "tag": "0003_numerous_tyger_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1774202130137,
+      "tag": "0004_zippy_fenris",
+      "breakpoints": true
     }
   ]
 }

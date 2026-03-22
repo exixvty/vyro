@@ -5,6 +5,8 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { getDb } from "./db";
+import { friendsRouter } from "./routers/friends";
+
 import {
   userProfiles,
   workoutPlans,
@@ -21,8 +23,10 @@ import {
   follows,
   feedLikes,
   users,
+  friendships,
+  referralCodes,
 } from "../drizzle/schema";
-import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, or, ne } from "drizzle-orm";
 
 // ─── Profile Router ───────────────────────────────────────────────────────────
 const profileRouter = router({
@@ -693,6 +697,7 @@ export const appRouter = router({
   habits: habitsRouter,
   gamification: gamificationRouter,
   social: socialRouter,
+  friends: friendsRouter,
 });
 
 export type AppRouter = typeof appRouter;

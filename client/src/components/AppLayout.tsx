@@ -12,6 +12,7 @@ import {
   Users,
   MoreHorizontal,
   X,
+  Gift,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ const MORE_ITEMS = [
   { path: "/habits", icon: CheckSquare, label: "Habits" },
   { path: "/library", icon: BookOpen, label: "Library" },
   { path: "/gamification", icon: Trophy, label: "Achievements" },
+  { path: "/referral", icon: Gift, label: "Referrals" },
   { path: "/social", icon: Users, label: "Community" },
 ];
 

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `referral_signups` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`referralCodeId` int NOT NULL,\n\t`newUserId` int NOT NULL,\n\t`referrerId` int NOT NULL,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `referral_signups_id` PRIMARY KEY(`id`)\n);\n\nALTER TABLE `referral_codes` ADD `rewardClaimedAt` timestamp;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3SJBdNXrBo7A2K3.root --database ABaDZShuwigi7srSSPoYho --execute CREATE TABLE `referral_signups` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`referralCodeId` int NOT NULL,\n\t`newUserId` int NOT NULL,\n\t`referrerId` int NOT NULL,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `referral_signups_id` PRIMARY KEY(`id`)\n);\n\nALTER TABLE `referral_codes` ADD `rewardClaimedAt` timestamp;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 3498
+}

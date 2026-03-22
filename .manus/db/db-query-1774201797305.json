@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `friendships` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`friendId` int NOT NULL,\n\t`status` enum('pending','accepted','blocked') NOT NULL DEFAULT 'pending',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`acceptedAt` timestamp,\n\tCONSTRAINT `friendships_id` PRIMARY KEY(`id`)\n);\n\nCREATE TABLE `referral_codes` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`code` varchar(12) NOT NULL,\n\t`expiresAt` timestamp,\n\t`usedCount` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `referral_codes_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `referral_codes_code_unique` UNIQUE(`code`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3SJBdNXrBo7A2K3.root --database ABaDZShuwigi7srSSPoYho --execute CREATE TABLE `friendships` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`friendId` int NOT NULL,\n\t`status` enum('pending','accepted','blocked') NOT NULL DEFAULT 'pending',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`acceptedAt` timestamp,\n\tCONSTRAINT `friendships_id` PRIMARY KEY(`id`)\n);\n\nCREATE TABLE `referral_codes` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`code` varchar(12) NOT NULL,\n\t`expiresAt` timestamp,\n\t`usedCount` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `referral_codes_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `referral_codes_code_unique` UNIQUE(`code`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 2493
+}

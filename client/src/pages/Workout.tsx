@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { ReferralPrompt } from "@/components/ReferralPrompt";
 
 type Tab = "generate" | "quick" | "history";
 
@@ -28,6 +29,7 @@ export default function Workout() {
   const [activeTab, setActiveTab] = useState<Tab>("generate");
   const [showActiveWorkout, setShowActiveWorkout] = useState(false);
   const [activeWorkout, setActiveWorkout] = useState<any>(null);
+  const [showReferralPrompt, setShowReferralPrompt] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">

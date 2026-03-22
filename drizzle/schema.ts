@@ -234,3 +234,58 @@ export const feedLikes = mysqlTable("feed_likes", {
   userId: int("userId").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
+
+// ─── Friends & Referrals ──────────────────────────────────────────────────────
+export const friendships = mysqlTable("friendships", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  friendId: int("friendId").notNull(),
+  status: mysqlEnum("status", ["pending", "accepted", "blocked"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  acceptedAt: timestamp("acceptedAt"),
+});
+
+export type Friendship = typeof friendships.$inferSelect;
+export type InsertFriendship = typeof friendships.$inferInsert;
+
+export const referralCodes = mysqlTable("referral_codes", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  code: varchar("code", { length: 12 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt"),
+  usedCount: int("usedCount").default(0).notNull(),
+  validSignups: int("validSignups").default(0).notNull(),
+  tier3ClaimedAt: timestamp("tier3ClaimedAt"),
+  tier5ClaimedAt: timestamp("tier5ClaimedAt"),
+  tier10ClaimedAt: timestamp("tier10ClaimedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ReferralCode = typeof referralCodes.$inferSelect;
+export type InsertReferralCode = typeof referralCodes.$inferInsert;
+
+export const referralSignups = mysqlTable("referral_signups", {
+  id: int("id").autoincrement().primaryKey(),
+  referralCodeId: int("referralCodeId").notNull(),
+  newUserId: int("newUserId").notNull(),
+  referrerId: int("referrerId").notNull(),
+  deviceId: varchar("deviceId", { length: 255 }).notNull(),
+  ipHash: varchar("ipHash", { length: 255 }),
+  isValid: boolean("isValid").default(false).notNull(),
+  validatedAt: timestamp("validatedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ReferralSignup = typeof referralSignups.$inferSelect;
+export type InsertReferralSignup = typeof referralSignups.$inferInsert;
+
+export const referralDevices = mysqlTable("referral_devices", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  deviceId: varchar("deviceId", { length: 255 }).notNull().unique(),
+  deviceName: varchar("deviceName", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ReferralDevice = typeof referralDevices.$inferSelect;
+export type InsertReferralDevice = typeof referralDevices.$inferInsert;

@@ -18,6 +18,8 @@ import Social from "./pages/Social";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Premium from "./pages/Premium";
+import Referral from "./pages/Referral";
+import Friends from "./pages/Friends";
 import AppLayout from "./components/AppLayout";
 
 function Router() {
@@ -56,6 +58,12 @@ function Router() {
         <AppLayout><Settings /></AppLayout>
       </Route>
       <Route path="/premium" component={Premium} />
+      <Route path="/referral">
+        <AppLayout><Referral /></AppLayout>
+      </Route>
+      <Route path="/friends">
+        <AppLayout><Friends /></AppLayout>
+      </Route>
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
