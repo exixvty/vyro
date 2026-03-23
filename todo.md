@@ -158,3 +158,9 @@
 - [x] workouts.getStats procedure for real database stats
 - [x] Performance route added and linked in AppLayout More drawer
 - [x] All tests passing (11/11), zero TypeScript errors
+
+## Phase 20: Artistic Maximalist Redesign
+- [x] Global CSS: grain texture, neon borders, frost-card, animated gradient border, stat-card, fire-icon, tier glow classes
+- [x] Dashboard: hero orbs, ambient gradient, animated XP bar, gradient stat pills, noise overlay on CTA, gradient ring progress, motivational banner
+- [x] AppLayout: gradient top line, glow icons with drop-shadow, colorful More drawer with per-item accent colors
+- [x] All tests passing (11/11), zero TypeScript errors
