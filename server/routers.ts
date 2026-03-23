@@ -28,6 +28,7 @@ import {
   users,
   friendships,
   referralCodes,
+  userXP,
 } from "../drizzle/schema";
 import { eq, and, desc, sql, inArray, or, ne } from "drizzle-orm";
 
@@ -191,9 +192,9 @@ Return a JSON object with this exact structure:
         ...input,
       });
 
-      // Update game stats
+      // Update game stats with level-up detection
       const xpEarned = Math.floor(input.durationMinutes * 2);
-      await awardXP(db, ctx.user.id, xpEarned, "Completed workout");
+      const xpResult = await awardXPWithLevelUp(db, ctx.user.id, xpEarned, "Completed workout");
 
       // Update stats
       await db
@@ -220,7 +221,7 @@ Return a JSON object with this exact structure:
         metadata: { type: input.type, duration: input.durationMinutes },
       });
 
-      return { success: true, xpEarned };
+      return { success: true, xpEarned, levelUp: xpResult };
     }),
 
   getSessions: protectedProcedure
@@ -284,9 +285,9 @@ const nutritionRouter = router({
       const db = await getDb();
       if (!db) throw new Error("DB unavailable");
       await db.insert(nutritionLogs).values({ userId: ctx.user.id, ...input });
-      return { success: true };
+      const foodXpResult = await awardXPWithLevelUp(db, ctx.user.id, 20, "Logged meal");
+      return { success: true, levelUp: foodXpResult };
     }),
-
   getDayLogs: protectedProcedure
     .input(z.object({ date: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -517,10 +518,9 @@ const habitsRouter = router({
         .set({ currentStreak: sql`currentStreak + 1` })
         .where(eq(habits.id, input.habitId));
 
-      await awardXP(db, ctx.user.id, 10, "Completed habit");
-      return { success: true };
+      const habitXpResult = await awardXPWithLevelUp(db, ctx.user.id, 10, "Completed habit");
+      return { success: true, levelUp: habitXpResult };
     }),
-
   getCompletions: protectedProcedure
     .input(z.object({ date: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -669,7 +669,7 @@ const socialRouter = router({
   }),
 });
 
-// ─── Helper: Award XP ─────────────────────────────────────────────────────────
+// ─── Helper: Award XP (legacy, no level-up data) ─────────────────────────────
 async function awardXP(db: any, userId: number, xp: number, _reason: string) {
   await db
     .insert(userGameStats)
@@ -680,6 +680,69 @@ async function awardXP(db: any, userId: number, xp: number, _reason: string) {
         level: sql`GREATEST(1, FLOOR(1 + SQRT(xp / 100)))`,
       },
     });
+}
+
+// ─── Tier/level helpers (mirrors engagement router) ───────────────────────────
+const TIER_THRESHOLDS: Record<string, number> = {
+  Rookie: 0, Prospect: 500, Athlete: 1500, Beast: 3500, Elite: 7000, Legend: 12000,
+};
+const TIER_NAMES = ["Rookie", "Prospect", "Athlete", "Beast", "Elite", "Legend"] as const;
+function calcTier(totalXP: number): string {
+  for (let i = TIER_NAMES.length - 1; i >= 0; i--) {
+    if (totalXP >= TIER_THRESHOLDS[TIER_NAMES[i]]) return TIER_NAMES[i];
+  }
+  return "Rookie";
+}
+function calcLevel(totalXP: number): number { return Math.floor(totalXP / 500) + 1; }
+
+// ─── Helper: Award XP with level-up detection ────────────────────────────────
+async function awardXPWithLevelUp(
+  db: any,
+  userId: number,
+  xpAmount: number,
+  _reason: string
+): Promise<{ xpGained: number; newLevel: number; oldLevel: number; newTier: string; oldTier: string; leveledUp: boolean; tierChanged: boolean; totalXP: number }> {
+  // Legacy game stats update
+  await db
+    .insert(userGameStats)
+    .values({ userId, xp: xpAmount, level: 1 })
+    .onDuplicateKeyUpdate({
+      set: {
+        xp: sql`xp + ${xpAmount}`,
+        level: sql`GREATEST(1, FLOOR(1 + SQRT(xp / 100)))`,
+      },
+    });
+
+  // Engagement XP table update
+  const current = await db.select().from(userXP).where(eq(userXP.userId, userId)).limit(1);
+  const currentXP = current[0]?.totalXP || 0;
+  const newTotalXP = currentXP + xpAmount;
+  const newLevel = calcLevel(newTotalXP);
+  const newTier = calcTier(newTotalXP);
+  const oldLevel = calcLevel(currentXP);
+  const oldTier = calcTier(currentXP);
+
+  if (current[0]) {
+    await db.update(userXP).set({
+      totalXP: newTotalXP,
+      currentLevel: newLevel,
+      currentTier: newTier,
+      lastLevelUpAt: newLevel > oldLevel ? new Date() : current[0].lastLevelUpAt,
+    }).where(eq(userXP.userId, userId));
+  } else {
+    await db.insert(userXP).values({ userId, totalXP: newTotalXP, currentLevel: newLevel, currentTier: newTier });
+  }
+
+  return {
+    xpGained: xpAmount,
+    newLevel,
+    oldLevel,
+    newTier,
+    oldTier,
+    leveledUp: newLevel > oldLevel,
+    tierChanged: newTier !== oldTier,
+    totalXP: newTotalXP,
+  };
 }
 
 // ─── App Router ───────────────────────────────────────────────────────────────

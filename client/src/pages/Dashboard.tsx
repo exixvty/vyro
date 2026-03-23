@@ -205,19 +205,18 @@ export default function Dashboard() {
           ].map(({ icon, value, label, grad, isNum }, i) => (
             <div
               key={i}
-              className="relative overflow-hidden rounded-2xl p-3.5 border border-white/5 press-scale hover-lift"
+              className="relative overflow-hidden rounded-lg p-3 border border-border press-scale"
               style={{
-                background: `linear-gradient(145deg, ${grad[0]}18, ${grad[1]}0a)`,
-                boxShadow: `0 4px 20px ${grad[0]}20`,
+                background: "var(--card)",
               }}
             >
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center mb-2"
-                style={{ background: `linear-gradient(135deg, ${grad[0]}40, ${grad[1]}20)` }}
+                className="w-7 h-7 rounded-md flex items-center justify-center mb-2"
+                style={{ background: "color-mix(in oklch, var(--primary) 15%, transparent)" }}
               >
-                <span style={{ color: grad[0] }}>{icon}</span>
+                <span style={{ color: "var(--primary)" }}>{icon}</span>
               </div>
-              <p className="text-xl font-display font-bold leading-none">
+              <p className="text-lg font-display font-bold leading-none">
                 {isNum ? (
                   <AnimatedCounter value={value as number} duration={900} />
                 ) : (
@@ -225,11 +224,6 @@ export default function Dashboard() {
                 )}
               </p>
               <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{label}</p>
-              {/* Decorative orb */}
-              <div
-                className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full opacity-20 blur-xl"
-                style={{ background: grad[0] }}
-              />
             </div>
           ))}
         </div>

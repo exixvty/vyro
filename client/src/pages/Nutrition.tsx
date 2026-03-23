@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { XPGainToast } from "@/components/Interactive";
+import { useLevelUp } from "@/hooks/useLevelUp";
 
 type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
@@ -45,18 +46,30 @@ export default function Nutrition() {
   const [expandedMeal, setExpandedMeal] = useState<MealType | null>("breakfast");
 
   const utils = trpc.useUtils();
+  const triggerLevelUp = useLevelUp();
   const { data: logs } = trpc.nutrition.getDayLogs.useQuery({ date: today });
   const { data: goals } = trpc.nutrition.getGoals.useQuery();
   const { data: profile } = trpc.profile.get.useQuery();
 
   const logFood = trpc.nutrition.logFood.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.nutrition.getDayLogs.invalidate();
       setShowAddForm(false);
       setForm({ foodName: "", calories: "", proteinG: "", carbsG: "", fatG: "", servingSize: "" });
       setXpGain({ visible: true, amount: 20 });
       setTimeout(() => setXpGain({ visible: false, amount: 0 }), 1000);
       toast.success("Food logged! +20 XP 🍎");
+      if (data?.levelUp?.leveledUp) {
+        triggerLevelUp({
+          newLevel: data.levelUp.newLevel,
+          oldLevel: data.levelUp.oldLevel,
+          newTier: data.levelUp.newTier,
+          oldTier: data.levelUp.oldTier,
+          tierChanged: data.levelUp.tierChanged,
+          xpGained: 20,
+          totalXP: data.levelUp.totalXP,
+        });
+      }
     },
   });
 

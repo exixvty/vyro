@@ -67,6 +67,7 @@ export const engagementRouter = router({
       const newLevel = calculateLevel(newTotalXP);
       const newTier = calculateTier(newTotalXP);
       const oldLevel = calculateLevel(currentXP);
+      const oldTier = calculateTier(currentXP);
 
       // Update or create XP record
       if (current[0]) {
@@ -96,7 +97,16 @@ export const engagementRouter = router({
         });
       }
 
-      return { totalXP: newTotalXP, level: newLevel, tier: newTier, leveledUp: newLevel > oldLevel };
+      return {
+        totalXP: newTotalXP,
+        level: newLevel,
+        tier: newTier,
+        leveledUp: newLevel > oldLevel,
+        tierChanged: newTier !== oldTier,
+        oldLevel,
+        oldTier,
+        xpGained: input.amount,
+      };
     }),
 
   // Get today's daily goals

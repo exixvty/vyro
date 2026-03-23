@@ -179,3 +179,23 @@
 - [x] Page transitions: slide-in between routes
 - [x] Swipe gestures on cards (dismiss, favorite)
 - [x] Toast notifications with satisfying slide+bounce
+
+## Phase 22: Level-Up Celebration Modal
+- [ ] LevelUpModal component: full-screen confetti burst, tier badge reveal, XP summary
+- [ ] Tier-up variant: special animation when crossing into a new tier (e.g. Rookie → Prospect)
+- [ ] useLevelUp hook: detects XP threshold crossing, stores prev level in localStorage
+- [ ] Wire into workout finish (highest XP event)
+- [ ] Wire into habit completion and food log
+- [ ] Global LevelUpModal mounted in AppLayout so any page can trigger it
+- [ ] CSS keyframes: burst-scale, tier-glow-pulse, star-orbit animations
+
+
+## Phase 23: Design Refresh (Black + Vibrant Minimalist)
+- [x] Update index.css: black base (#0a0a0a), vibrant accent (neon cyan/electric blue), modern sans-serif
+- [x] Redesign card styling: minimal borders, subtle shadows, clean spacing
+- [x] Update button styling: sleek, modern, vibrant hover states
+- [x] Refresh nav bar: minimal, dark, with vibrant active indicators
+- [x] Update modal styling: clean backdrop, minimal borders
+- [x] Refresh all page layouts: remove clutter, emphasize content hierarchy
+- [x] Update icon colors and sizing for modern look
+- [x] Test all pages for visual consistency
