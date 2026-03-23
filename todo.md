@@ -148,3 +148,13 @@
 - [x] Integrate perks into Tiers page (main section + modal)
 - [x] Perks include: badges, custom notes, templates, 2x/3x/5x XP, Beast Mode, AI Coach, VIP community
 - [x] All tests passing (11/11), zero TypeScript errors
+
+## Phase 19: Performance Overview & UI Redesign
+- [x] Cleaner minimal Dashboard — ring progress, XP bar, tier badge, motivation message
+- [x] Performance Overview page: volume lifted, total time, workouts, sets, reps
+- [x] Muscle distribution chart (radar/donut via Recharts)
+- [x] Stats over time (line charts via Recharts)
+- [x] Creative trophy showcase: Iron Will, Volume King, Consistency Crown
+- [x] workouts.getStats procedure for real database stats
+- [x] Performance route added and linked in AppLayout More drawer
+- [x] All tests passing (11/11), zero TypeScript errors

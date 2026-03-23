@@ -233,4 +233,108 @@ export const workoutsRouter = router({
 
       return { success: true };
     }),
+
+  getPerformanceStats: protectedProcedure
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return null;
+
+      // Get all completed sessions
+      const sessions = await db
+        .select()
+        .from(workoutSessions)
+        .where(eq(workoutSessions.userId, ctx.user.id));
+
+      const completedSessions = sessions.filter(s => s.completedAt !== null);
+
+      // Get all exercise logs for this user's sessions
+      const sessionIds = completedSessions.map(s => s.id);
+
+      let allSets: typeof workoutSets.$inferSelect[] = [];
+      let allExerciseLogs: typeof workoutExerciseLogs.$inferSelect[] = [];
+
+      if (sessionIds.length > 0) {
+        // Fetch exercise logs for all sessions
+        for (const sessionId of sessionIds) {
+          const logs = await db
+            .select()
+            .from(workoutExerciseLogs)
+            .where(eq(workoutExerciseLogs.workoutSessionId, sessionId));
+          allExerciseLogs.push(...logs);
+        }
+
+        // Fetch all sets
+        for (const log of allExerciseLogs) {
+          const sets = await db
+            .select()
+            .from(workoutSets)
+            .where(eq(workoutSets.workoutExerciseLogId, log.id));
+          allSets.push(...sets);
+        }
+      }
+
+      // Calculate total volume (weight * reps)
+      const totalVolumeKg = allSets.reduce((sum, s) => {
+        if (!s.weight || !s.reps) return sum;
+        const w = s.weightUnit === 'lbs' ? s.weight * 0.453592 : s.weight;
+        return sum + w * s.reps;
+      }, 0);
+
+      // Calculate total time
+      const totalMinutes = completedSessions.reduce((sum, s) => sum + (s.durationMinutes || 0), 0);
+
+      // Calculate total reps
+      const totalReps = allSets.reduce((sum, s) => sum + (s.reps || 0), 0);
+
+      // Build weekly stats (last 8 weeks)
+      const now = new Date();
+      const weeklyStats = Array.from({ length: 8 }, (_, i) => {
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - (7 * (7 - i)));
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 7);
+
+        const weekSessions = completedSessions.filter(s => {
+          if (!s.completedAt) return false;
+          const d = new Date(s.completedAt);
+          return d >= weekStart && d < weekEnd;
+        });
+
+        const weekVolume = weekSessions.reduce((sum, session) => {
+          const sessionLogs = allExerciseLogs.filter(l => l.workoutSessionId === session.id);
+          const sessionSets = allSets.filter(s => sessionLogs.some(l => l.id === s.workoutExerciseLogId));
+          return sum + sessionSets.reduce((sv, s) => {
+            if (!s.weight || !s.reps) return sv;
+            const w = s.weightUnit === 'lbs' ? s.weight * 0.453592 : s.weight;
+            return sv + w * s.reps;
+          }, 0);
+        }, 0);
+
+        return {
+          week: `W${i + 1}`,
+          workouts: weekSessions.length,
+          volume: Math.round(weekVolume),
+          minutes: weekSessions.reduce((sum, s) => sum + (s.durationMinutes || 0), 0),
+        };
+      });
+
+      return {
+        totalWorkouts: completedSessions.length,
+        totalVolumeKg: Math.round(totalVolumeKg),
+        totalMinutes,
+        totalSets: allSets.length,
+        totalReps,
+        weeklyStats,
+        recentSessions: completedSessions
+          .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime())
+          .slice(0, 5)
+          .map(s => ({
+            id: s.id,
+            title: s.title,
+            durationMinutes: s.durationMinutes,
+            completedAt: s.completedAt,
+            rating: s.rating,
+          })),
+      };
+    }),
 });

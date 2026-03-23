@@ -1,71 +1,79 @@
+import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
 import {
-  Zap,
-  Flame,
-  Dumbbell,
-  TrendingUp,
-  Trophy,
-  ChevronRight,
-  Play,
-  Star,
-  Activity,
-  Apple,
-  Brain,
+  Dumbbell, Flame, Play, ChevronRight, Apple, BarChart2, Trophy, Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import TierBadge from "@/components/TierBadge";
 
-function XPBar({ xp, level }: { xp: number; level: number }) {
-  const xpForLevel = (l: number) => l * l * 100;
-  const currentLevelXP = xpForLevel(level - 1);
-  const nextLevelXP = xpForLevel(level);
-  const progress = Math.min(100, ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100);
+// ─── Motivational messages by goal ──────────────────────────────────────────
+const MOTIVATION: Record<string, string> = {
+  fat_loss: "Stay in your deficit. Every rep burns closer to your goal 🔥",
+  lean_bulk: "Fuel the muscle. Hit your protein target today 💪",
+  muscle_gain: "Progressive overload is the key. Push heavier today 🏋️",
+  athlete_performance: "Speed, strength, endurance. Train all three today ⚡",
+  general_fitness: "Consistency beats intensity. Show up today 🎯",
+};
 
+// ─── Ring Progress ────────────────────────────────────────────────────────────
+function RingProgress({ value, size = 56, stroke = 5, color = "var(--primary)" }: {
+  value: number; size?: number; stroke?: number; color?: string;
+}) {
+  const r = (size - stroke * 2) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (Math.min(100, value) / 100) * circ;
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex-1">
-        <div className="flex justify-between text-xs mb-1">
-          <span className="text-muted-foreground">Level {level}</span>
-          <span className="text-muted-foreground">{xp} XP</span>
-        </div>
-        <div className="xp-bar">
-          <div className="xp-fill" style={{ width: `${progress}%` }} />
-        </div>
+    <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="oklch(0.22 0.02 270)" strokeWidth={stroke} />
+      <circle
+        cx={size / 2} cy={size / 2} r={r} fill="none"
+        stroke={color} strokeWidth={stroke} strokeLinecap="round"
+        strokeDasharray={circ} strokeDashoffset={offset}
+        style={{ transition: "stroke-dashoffset 0.6s ease" }}
+      />
+    </svg>
+  );
+}
+
+// ─── Quick Stat Pill ─────────────────────────────────────────────────────────
+function StatPill({ icon, value, label, color }: {
+  icon: React.ReactNode; value: string | number; label: string; color: string;
+}) {
+  return (
+    <div className="flex-1 bg-card border border-border/50 rounded-2xl p-3 flex flex-col gap-1">
+      <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", color)}>
+        {icon}
       </div>
+      <p className="text-lg font-bold font-display leading-none">{value}</p>
+      <p className="text-[11px] text-muted-foreground">{label}</p>
     </div>
   );
 }
 
+// ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
-  const today = format(new Date(), "yyyy-MM-dd");
+  const [today] = useMemo(() => [format(new Date(), "yyyy-MM-dd")], []);
 
   const { data: profile } = trpc.profile.get.useQuery();
   const { data: gameStats } = trpc.gamification.getStats.useQuery();
+  const { data: xpData } = trpc.engagement.getXP.useQuery();
   const { data: recentSessions } = trpc.workout.getSessions.useQuery({ limit: 3 });
   const { data: todayNutrition } = trpc.nutrition.getDayLogs.useQuery({ date: today });
   const { data: nutritionGoals } = trpc.nutrition.getGoals.useQuery();
   const { data: habitList } = trpc.habits.list.useQuery();
   const { data: todayCompletions } = trpc.habits.getCompletions.useQuery({ date: today });
 
-  const totalCalories = todayNutrition?.reduce((sum, log) => sum + log.calories, 0) ?? 0;
+  const totalCalories = todayNutrition?.reduce((sum, l) => sum + l.calories, 0) ?? 0;
   const calorieGoal = nutritionGoals?.dailyCalories ?? 2000;
   const calorieProgress = Math.min(100, (totalCalories / calorieGoal) * 100);
-
   const completedHabits = todayCompletions?.length ?? 0;
   const totalHabits = habitList?.length ?? 0;
-
-  const goalLabels: Record<string, string> = {
-    fat_loss: "Fat Loss",
-    lean_bulk: "Lean Bulk",
-    muscle_gain: "Muscle Gain",
-    athlete_performance: "Performance",
-    general_fitness: "General Fitness",
-  };
+  const habitProgress = totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0;
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -74,182 +82,188 @@ export default function Dashboard() {
     return "Good evening";
   };
 
+  const motivationMsg = MOTIVATION[profile?.primaryGoal ?? ""] ?? "Show up today. Every session counts.";
+  const tier = xpData?.currentTier ?? "Rookie";
+  const level = xpData?.currentLevel ?? 1;
+  const totalXP = xpData?.totalXP ?? 0;
+  const xpProgress = Math.min(100, (totalXP % 500) / 5);
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="px-5 pt-12 pb-4">
-        <div className="flex items-center justify-between mb-1">
+    <div className="min-h-screen bg-background text-foreground pb-28">
+
+      {/* ── Header ── */}
+      <div className="px-5 pt-12 pb-5">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="text-muted-foreground text-sm">{greeting()},</p>
-            <h1 className="text-2xl font-display font-bold text-foreground">
-              {user?.name?.split(" ")[0] || "Athlete"} 👋
+            <p className="text-xs text-muted-foreground">{greeting()}</p>
+            <h1 className="text-2xl font-bold font-display mt-0.5">
+              {user?.name?.split(" ")[0] || "Athlete"}
             </h1>
           </div>
           <button
-            onClick={() => navigate("/gamification")}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-border"
+            onClick={() => navigate("/tiers")}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-border/60"
           >
-            <Star size={14} className="text-yellow-400" fill="currentColor" />
-            <span className="text-sm font-semibold text-foreground">Lvl {gameStats?.level ?? 1}</span>
+            <TierBadge tier={tier as any} level={level} size="sm" showLabel={false} />
+            <div className="text-left">
+              <p className="text-[10px] text-muted-foreground leading-none">{tier}</p>
+              <p className="text-xs font-bold leading-none mt-0.5">Lv.{level}</p>
+            </div>
           </button>
         </div>
 
         {/* XP bar */}
-        <div className="mt-3">
-          <XPBar xp={gameStats?.xp ?? 0} level={gameStats?.level ?? 1} />
+        <div className="mt-4">
+          <div className="flex justify-between text-[11px] text-muted-foreground mb-1.5">
+            <span>{totalXP.toLocaleString()} XP</span>
+            <span>{500 - (totalXP % 500)} XP to next level</span>
+          </div>
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-violet-500 to-violet-400 rounded-full transition-all duration-700"
+              style={{ width: `${xpProgress}%` }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Stats row */}
-      <div className="px-5 mb-5">
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "Workouts", value: gameStats?.totalWorkouts ?? 0, icon: Dumbbell, color: "text-purple-400", bg: "bg-purple-400/10" },
-            { label: "Streak", value: `${gameStats?.workoutStreak ?? 0}🔥`, icon: Flame, color: "text-orange-400", bg: "bg-orange-400/10" },
-            { label: "Minutes", value: gameStats?.totalMinutes ?? 0, icon: Activity, color: "text-blue-400", bg: "bg-blue-400/10" },
-          ].map(({ label, value, icon: Icon, color, bg }) => (
-            <div key={label} className="bg-card border border-border rounded-2xl p-3">
-              <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center mb-2", bg)}>
-                <Icon size={16} className={color} />
-              </div>
-              <p className="text-lg font-display font-bold text-foreground">{value}</p>
-              <p className="text-xs text-muted-foreground">{label}</p>
-            </div>
-          ))}
-        </div>
+      {/* ── Quick Stats ── */}
+      <div className="px-5 mb-5 flex gap-3">
+        <StatPill
+          icon={<Dumbbell size={14} className="text-violet-400" />}
+          value={gameStats?.totalWorkouts ?? 0}
+          label="Workouts"
+          color="bg-violet-500/10"
+        />
+        <StatPill
+          icon={<Flame size={14} className="text-orange-400" />}
+          value={`${gameStats?.workoutStreak ?? 0}🔥`}
+          label="Streak"
+          color="bg-orange-500/10"
+        />
+        <StatPill
+          icon={<Zap size={14} className="text-yellow-400" />}
+          value={gameStats?.level ?? 1}
+          label="Level"
+          color="bg-yellow-500/10"
+        />
       </div>
 
-      {/* Quick Start */}
+      {/* ── Start Workout CTA ── */}
       <div className="px-5 mb-5">
         <button
           onClick={() => navigate("/workout")}
-          className="w-full p-5 rounded-2xl bg-primary glow-primary flex items-center justify-between group transition-all hover:scale-[1.02]"
+          className="w-full p-5 rounded-2xl bg-primary flex items-center justify-between group transition-all active:scale-[0.98]"
+          style={{ boxShadow: "0 8px 32px oklch(0.65 0.22 290 / 0.35)" }}
         >
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
               <Play size={22} className="text-white" fill="white" />
             </div>
             <div className="text-left">
-              <p className="font-display font-bold text-white text-lg">Start Workout</p>
-              <p className="text-white/70 text-sm">AI-powered · Personalized</p>
+              <p className="font-bold text-white text-lg font-display leading-tight">Start Workout</p>
+              <p className="text-white/70 text-sm">Build your session</p>
             </div>
           </div>
           <ChevronRight size={20} className="text-white/70 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
 
-      {/* Today's Overview */}
+      {/* ── Today's Rings ── */}
       <div className="px-5 mb-5">
-        <h2 className="text-lg font-display font-semibold mb-3">Today's Overview</h2>
+        <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Today</p>
         <div className="grid grid-cols-2 gap-3">
-          {/* Calories */}
+          {/* Calories ring */}
           <button
             onClick={() => navigate("/nutrition")}
-            className="bg-card border border-border rounded-2xl p-4 text-left"
+            className="bg-card border border-border/50 rounded-2xl p-4 flex items-center gap-3 text-left"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <Apple size={16} className="text-green-400" />
-              <span className="text-xs font-medium text-muted-foreground">Calories</span>
+            <div className="relative shrink-0">
+              <RingProgress value={calorieProgress} color="oklch(0.72 0.18 145)" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Apple size={14} className="text-green-400" />
+              </div>
             </div>
-            <p className="text-xl font-display font-bold text-foreground">{Math.round(totalCalories)}</p>
-            <p className="text-xs text-muted-foreground mb-2">of {calorieGoal} kcal</p>
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `${calorieProgress}%` }} />
+            <div>
+              <p className="text-lg font-bold font-display leading-none">{Math.round(totalCalories)}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">of {calorieGoal} kcal</p>
             </div>
           </button>
 
-          {/* Habits */}
+          {/* Habits ring */}
           <button
             onClick={() => navigate("/habits")}
-            className="bg-card border border-border rounded-2xl p-4 text-left"
+            className="bg-card border border-border/50 rounded-2xl p-4 flex items-center gap-3 text-left"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <Flame size={16} className="text-orange-400" />
-              <span className="text-xs font-medium text-muted-foreground">Habits</span>
+            <div className="relative shrink-0">
+              <RingProgress value={habitProgress} color="oklch(0.72 0.18 55)" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Flame size={14} className="text-orange-400" />
+              </div>
             </div>
-            <p className="text-xl font-display font-bold text-foreground">
-              {completedHabits}/{totalHabits}
-            </p>
-            <p className="text-xs text-muted-foreground mb-2">completed today</p>
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: totalHabits > 0 ? `${(completedHabits / totalHabits) * 100}%` : "0%" }} />
+            <div>
+              <p className="text-lg font-bold font-display leading-none">{completedHabits}/{totalHabits}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">habits done</p>
             </div>
           </button>
         </div>
       </div>
 
-      {/* AI Suggestions */}
+      {/* ── Motivation Banner ── */}
       <div className="px-5 mb-5">
-        <div className="bg-card border border-border rounded-2xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Brain size={16} className="text-primary" />
-            <span className="text-sm font-semibold text-foreground">AI Insights</span>
-          </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {profile?.primaryGoal === "fat_loss"
-              ? "You're on track! Aim for a 300-500 calorie deficit today. Consider a 30-min cardio session."
-              : profile?.primaryGoal === "muscle_gain"
-              ? "Protein intake is key today. Hit your strength workout and aim for 1.6-2.2g protein per kg bodyweight."
-              : "Stay consistent with your training. Every workout counts toward your goals!"}
-          </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="mt-2 text-primary hover:text-primary/80 px-0"
-            onClick={() => navigate("/workout")}
-          >
-            Generate today's workout <ChevronRight size={14} className="ml-1" />
-          </Button>
+        <div className="bg-card border border-border/50 rounded-2xl p-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2">Daily Motivation</p>
+          <p className="text-sm text-foreground leading-relaxed">{motivationMsg}</p>
         </div>
       </div>
 
-      {/* Recent Workouts */}
+      {/* ── Recent Workouts ── */}
       {recentSessions && recentSessions.length > 0 && (
         <div className="px-5 mb-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-display font-semibold">Recent Workouts</h2>
-            <button onClick={() => navigate("/workout")} className="text-primary text-sm font-medium">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest">Recent</p>
+            <button onClick={() => navigate("/workout")} className="text-xs text-primary font-medium">
               See all
             </button>
           </div>
           <div className="space-y-2">
             {recentSessions.map((session) => (
-              <div key={session.id} className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Dumbbell size={18} className="text-primary" />
+              <div key={session.id} className="flex items-center gap-3 p-3 bg-card border border-border/50 rounded-xl">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Dumbbell size={16} className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-foreground truncate">{session.title}</p>
+                  <p className="font-medium text-sm truncate">{session.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {session.durationMinutes}min · {session.caloriesBurned || 0} kcal
                   </p>
                 </div>
-                <div className="flex">
-                  {Array.from({ length: session.rating || 3 }).map((_, i) => (
-                    <Star key={i} size={12} className="text-yellow-400" fill="currentColor" />
-                  ))}
-                </div>
+                <ChevronRight size={14} className="text-muted-foreground shrink-0" />
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Goal banner */}
+      {/* ── Quick Links ── */}
       <div className="px-5 mb-8">
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border">
-          <Trophy size={20} className="text-yellow-400 shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">
-              Goal: {goalLabels[profile?.primaryGoal || ""] || "Set your goal"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {profile?.fitnessLevel ? `${profile.fitnessLevel} level` : "Complete onboarding"}
-            </p>
-          </div>
-          <button onClick={() => navigate("/settings")} className="text-primary">
-            <ChevronRight size={16} />
-          </button>
+        <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Explore</p>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: "Performance", icon: BarChart2, path: "/performance", color: "text-violet-400", bg: "bg-violet-500/10" },
+            { label: "Tiers & Ranks", icon: Trophy, path: "/tiers", color: "text-yellow-400", bg: "bg-yellow-500/10" },
+          ].map(({ label, icon: Icon, path, color, bg }) => (
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              className="bg-card border border-border/50 rounded-2xl p-4 flex items-center gap-3 text-left"
+            >
+              <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", bg)}>
+                <Icon size={18} className={color} />
+              </div>
+              <p className="font-medium text-sm">{label}</p>
+            </button>
+          ))}
         </div>
       </div>
     </div>

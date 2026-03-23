@@ -13,6 +13,7 @@ import {
   MoreHorizontal,
   X,
   Gift,
+  BarChart2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
 const MORE_ITEMS = [
   { path: "/habits", icon: CheckSquare, label: "Habits" },
   { path: "/library", icon: BookOpen, label: "Library" },
+  { path: "/performance", icon: BarChart2, label: "Performance" },
   { path: "/tiers", icon: Trophy, label: "Tiers" },
   { path: "/gamification", icon: Trophy, label: "Achievements" },
   { path: "/referral", icon: Gift, label: "Referrals" },
