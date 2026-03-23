@@ -255,10 +255,13 @@ export default function Library() {
           </div>
         ) : (
           filtered.map((exercise) => (
-            <button
+            <div
               key={exercise.id}
               onClick={() => setSelected(exercise)}
-              className="w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition text-left border border-border"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && setSelected(exercise)}
+              className="w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition text-left border border-border cursor-pointer"
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
@@ -291,7 +294,7 @@ export default function Library() {
                   <ChevronRight className="text-muted-foreground" size={20} />
                 </div>
               </div>
-            </button>
+            </div>
           ))
         )}
       </div>

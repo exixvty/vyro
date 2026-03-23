@@ -339,3 +339,99 @@ export const workoutSets = mysqlTable("workout_sets", {
 
 export type WorkoutSet = typeof workoutSets.$inferSelect;
 export type InsertWorkoutSet = typeof workoutSets.$inferInsert;
+
+
+// ─── XP & Tier System ─────────────────────────────────────────────────────────
+export const userXP = mysqlTable("user_xp", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  totalXP: int("totalXP").default(0).notNull(),
+  currentLevel: int("currentLevel").default(1).notNull(),
+  currentTier: mysqlEnum("currentTier", ["Rookie", "Prospect", "Athlete", "Beast", "Elite", "Legend"]).default("Rookie").notNull(),
+  lastLevelUpAt: timestamp("lastLevelUpAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserXP = typeof userXP.$inferSelect;
+export type InsertUserXP = typeof userXP.$inferInsert;
+
+// ─── Daily Goals ──────────────────────────────────────────────────────────────
+export const dailyGoals = mysqlTable("daily_goals", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
+  workoutCompleted: boolean("workoutCompleted").default(false).notNull(),
+  mealsLogged: boolean("mealsLogged").default(false).notNull(),
+  activityCompleted: boolean("activityCompleted").default(false).notNull(),
+  allGoalsCompletedAt: timestamp("allGoalsCompletedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DailyGoal = typeof dailyGoals.$inferSelect;
+export type InsertDailyGoal = typeof dailyGoals.$inferInsert;
+
+// ─── User Achievements ────────────────────────────────────────────────────────
+export const userAchievements = mysqlTable("user_achievements", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  achievementType: mysqlEnum("achievementType", [
+    "first_workout",
+    "seven_day_streak",
+    "first_level_up",
+    "ten_workouts",
+    "fifty_workouts",
+    "first_meal_log",
+    "first_progress_photo",
+    "beast_mode_activated",
+  ]).notNull(),
+  unlockedAt: timestamp("unlockedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = typeof userAchievements.$inferInsert;
+
+// ─── Progress Photos ──────────────────────────────────────────────────────────
+export const progressPhotos = mysqlTable("progress_photos", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  photoUrl: text("photoUrl").notNull(),
+  angle: mysqlEnum("angle", ["front", "side", "back"]).notNull(),
+  date: timestamp("date").defaultNow().notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProgressPhoto = typeof progressPhotos.$inferSelect;
+export type InsertProgressPhoto = typeof progressPhotos.$inferInsert;
+
+// ─── Login Streaks ────────────────────────────────────────────────────────────
+export const loginStreaks = mysqlTable("login_streaks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  currentStreak: int("currentStreak").default(0).notNull(),
+  longestStreak: int("longestStreak").default(0).notNull(),
+  lastLoginDate: varchar("lastLoginDate", { length: 10 }), // YYYY-MM-DD
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LoginStreak = typeof loginStreaks.$inferSelect;
+export type InsertLoginStreak = typeof loginStreaks.$inferInsert;
+
+// ─── Beast Mode ───────────────────────────────────────────────────────────────
+export const beastMode = mysqlTable("beast_mode", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  isActive: boolean("isActive").default(false).notNull(),
+  activatedAt: timestamp("activatedAt"),
+  deactivatedAt: timestamp("deactivatedAt"),
+  totalActivations: int("totalActivations").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BeastMode = typeof beastMode.$inferSelect;
+export type InsertBeastMode = typeof beastMode.$inferInsert;

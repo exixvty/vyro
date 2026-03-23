@@ -113,3 +113,20 @@
 
 ## Bug Fixes
 - [x] Fix JSON parsing error on /library — equipment/muscleGroups already parsed by Drizzle json(), removed redundant JSON.parse()
+- [x] Fix nested button error on /library — changed outer <button> to <div role="button"> to avoid nesting
+
+
+## Phase 16: High-Engagement Features
+- [x] Update schema: XP tiers, daily goals, achievements, progress photos, login streaks, beast mode (6 new tables)
+- [x] XP/tier system: Rookie→Prospect→Athlete→Beast→Elite→Legend with tier calculation
+- [x] Engagement routers: XP tracking, daily goals, achievements, login streaks, Beast Mode
+- [x] Level-up detection and tier progression logic
+- [x] Daily goals: 3 simple goals with completion tracking
+- [x] Login streak tracking with current/longest streak
+- [x] Beast Mode toggle with activation tracking
+- [ ] Level-up animations and tier unlock messages (UI)
+- [ ] Progress photo upload and side-by-side comparison (UI)
+- [ ] Enhanced Dashboard: today screen, XP bar, streak, quick start button (UI)
+- [ ] Smart notifications: motivational, non-spammy, toggleable (UI)
+- [ ] Personalized motivation messages based on user goals (UI)
+- [ ] Performance optimization and testing

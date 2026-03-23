@@ -8,6 +8,7 @@ import { getDb } from "./db";
 import { friendsRouter } from "./routers/friends";
 import { exercisesRouter } from "./routers/exercises";
 import { workoutsRouter } from "./routers/workouts";
+import { engagementRouter } from "./routers/engagement";
 
 import {
   userProfiles,
@@ -702,6 +703,7 @@ export const appRouter = router({
   friends: friendsRouter,
   exercises: exercisesRouter,
   workouts: workoutsRouter,
+  engagement: engagementRouter,
 });
 
 export type AppRouter = typeof appRouter;
