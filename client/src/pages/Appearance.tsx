@@ -45,6 +45,8 @@ export default function Appearance() {
     setIsSaving(true);
     try {
       await updateTheme.mutateAsync(local);
+      // Sync saved preferences back into ThemeContext to apply live
+      setCustomization(local);
       toast.success("Theme preferences saved!");
     } catch (e) {
       toast.error("Failed to save theme");

@@ -133,15 +133,16 @@ export function ThemeProvider({
 
   const applyCustomizationToDOM = (custom: ThemeCustomization) => {
     const root = document.documentElement;
-    const primaryOklch = COLOR_MAP[custom.primaryColor] || COLOR_MAP.violet;
-    const accentOklch = COLOR_MAP[custom.accentColor] || COLOR_MAP.cyan;
-    const secondaryOklch = COLOR_MAP[custom.secondaryColor] || COLOR_MAP.pink;
+    const body = document.body;
 
-    root.style.setProperty("--primary-custom", primaryOklch);
-    root.style.setProperty("--accent-custom", accentOklch);
-    root.style.setProperty("--secondary-custom", secondaryOklch);
+    // Set data-accent attribute to apply all color CSS variables at once
+    root.setAttribute("data-accent", custom.primaryColor);
+
+    // Apply font family to body
+    body.style.fontFamily = FONT_MAP[custom.fontFamily] || FONT_MAP.inter;
+
+    // Store button style for component usage
     root.style.setProperty("--button-style", custom.buttonStyle);
-    root.style.setProperty("--font-family-custom", FONT_MAP[custom.fontFamily] || FONT_MAP.inter);
   };
 
   useEffect(() => {

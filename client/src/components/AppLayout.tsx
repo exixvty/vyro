@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   LayoutDashboard,
   Dumbbell,
@@ -112,6 +113,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const [showMore, setShowMore] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const { customization } = useTheme();
 
   const isMoreActive = MORE_ITEMS.some(
     (item) => location === item.path || location.startsWith(item.path + "/")
@@ -134,6 +136,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-container flex flex-col bg-background">
+      {/* App header with customized name and logo */}
+      <div className="sticky top-0 z-40 px-5 pt-4 pb-2 bg-gradient-to-b from-background to-background/80 backdrop-blur-sm border-b border-border/40">
+        <div className="flex items-center gap-3">
+          {customization.logoUrl ? (
+            <img src={customization.logoUrl} alt="logo" className="w-8 h-8 rounded-lg" />
+          ) : (
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+              style={{ background: "var(--primary)" }}
+            >
+              {customization.appName.charAt(0)}
+            </div>
+          )}
+          <span className="font-display font-bold text-lg gradient-text">{customization.appName}</span>
+        </div>
+      </div>
+
       {/* Main content with page transitions */}
       <main className="flex-1 overflow-y-auto pb-nav scrollbar-hide">
         <PageTransition locationKey={location}>

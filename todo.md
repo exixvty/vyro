@@ -194,3 +194,10 @@
 - [x] App name customization (replaces "VYRO" in nav and header)
 - [x] UI cleanup: tighten spacing, reduce padding, simplify card shadows, cleaner borders
 - [x] Test all customization flows and persistence
+
+## Phase 25: Auto-Apply Theme Preferences
+- [x] Load saved theme from DB on startup and sync into ThemeContext
+- [x] Apply CSS variables (primary/accent/secondary colors) live on save
+- [x] Apply font-family CSS variable to document body
+- [x] Wire app name into AppLayout nav header from ThemeContext
+- [x] Ensure Appearance page save triggers immediate DOM update
