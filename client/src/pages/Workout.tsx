@@ -32,7 +32,6 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { useLocation } from "wouter";
 import { CheckmarkButton, ConfettiEffect, XPGainToast } from "@/components/Interactive";
-import { useLevelUp } from "@/hooks/useLevelUp";
 
 /* ─── Types ───────────────────────────────────────────────────────────── */
 interface ExerciseFromDB {
@@ -496,25 +495,13 @@ function ActiveSession({
   const [xpGain, setXpGain] = useState<{ visible: boolean; amount: number }>({ visible: false, amount: 0 });
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const restRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const triggerLevelUp = useLevelUp();
+
   const logSession = trpc.workout.logSession.useMutation({
     onSuccess: (data) => {
       setShowFinishConfetti(true);
       setXpGain({ visible: true, amount: data.xpEarned });
       setTimeout(() => setXpGain({ visible: false, amount: 0 }), 1200);
       toast.success(`Workout complete! +${data.xpEarned} XP 🎉`);
-      // Fire level-up modal if user leveled up
-      if (data.levelUp?.leveledUp) {
-        triggerLevelUp({
-          newLevel: data.levelUp.newLevel,
-          oldLevel: data.levelUp.oldLevel,
-          newTier: data.levelUp.newTier,
-          oldTier: data.levelUp.oldTier,
-          tierChanged: data.levelUp.tierChanged,
-          xpGained: data.xpEarned,
-          totalXP: data.levelUp.totalXP,
-        });
-      }
       setTimeout(() => onFinish(), 1500);
     },
     onError: () => toast.error("Failed to save workout"),

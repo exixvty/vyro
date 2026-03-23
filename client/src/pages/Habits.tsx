@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { CheckmarkButton, XPGainToast } from "@/components/Interactive";
-import { useLevelUp } from "@/hooks/useLevelUp";
 
 const HABIT_ICONS = ["💪", "🏃", "🥗", "💧", "😴", "🧘", "📚", "🚴", "🏊", "⚽", "🎯", "🔥"];
 const HABIT_COLORS = ["violet", "blue", "green", "orange", "red", "pink"];
@@ -25,28 +24,16 @@ export default function Habits() {
   const [xpGain, setXpGain] = useState<{ visible: boolean; amount: number }>({ visible: false, amount: 0 });
 
   const utils = trpc.useUtils();
-  const triggerLevelUp = useLevelUp();
   const { data: habitList } = trpc.habits.list.useQuery();
   const { data: completions } = trpc.habits.getCompletions.useQuery({ date: today });
 
   const completeHabit = trpc.habits.complete.useMutation({
-    onSuccess: (data) => {
+    onSuccess: () => {
       utils.habits.getCompletions.invalidate();
       utils.habits.list.invalidate();
       setXpGain({ visible: true, amount: 30 });
       setTimeout(() => setXpGain({ visible: false, amount: 0 }), 1000);
       toast.success("Habit done! +30 XP 🔥");
-      if (data?.levelUp?.leveledUp) {
-        triggerLevelUp({
-          newLevel: data.levelUp.newLevel,
-          oldLevel: data.levelUp.oldLevel,
-          newTier: data.levelUp.newTier,
-          oldTier: data.levelUp.oldTier,
-          tierChanged: data.levelUp.tierChanged,
-          xpGained: 30,
-          totalXP: data.levelUp.totalXP,
-        });
-      }
     },
     onError: () => toast.error("Failed to update habit"),
   });

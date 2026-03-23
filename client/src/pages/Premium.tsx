@@ -166,7 +166,7 @@ export default function Premium() {
           Start Premium — {PLANS.find((p) => p.id === selectedPlan)?.price}{PLANS.find((p) => p.id === selectedPlan)?.period}
         </Button>
         <p className="text-center text-xs text-muted-foreground">
-          Cancel anytime · 21-day free trial · Secure payment
+          Cancel anytime · 7-day free trial · Secure payment
         </p>
       </div>
     </div>

@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import LevelUpModal, { type LevelUpData } from "@/components/LevelUpModal";
-import { onLevelUpEvent } from "@/hooks/useLevelUp";
 import {
   LayoutDashboard,
   Dumbbell,
@@ -112,15 +110,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const [showMore, setShowMore] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [levelUpData, setLevelUpData] = useState<LevelUpData | null>(null);
-
-  // Listen for level-up events from any page
-  useEffect(() => {
-    return onLevelUpEvent((data) => {
-      // Small delay so the XP toast can show first
-      setTimeout(() => setLevelUpData(data), 600);
-    });
-  }, []);
 
   const isMoreActive = MORE_ITEMS.some(
     (item) => location === item.path || location.startsWith(item.path + "/")
@@ -143,9 +132,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-container flex flex-col bg-background">
-      {/* Global Level-Up Celebration Modal */}
-      <LevelUpModal data={levelUpData} onClose={() => setLevelUpData(null)} />
-
       {/* Main content with page transitions */}
       <main className="flex-1 overflow-y-auto pb-nav scrollbar-hide">
         <PageTransition locationKey={location}>
@@ -245,16 +231,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 safe-bottom">
         <div className="mx-3 mb-3">
-          {/* Minimalist nav container */}
+          {/* Artistic nav container */}
           <div
-            className="rounded-xl border border-border overflow-hidden"
+            className="rounded-[1.5rem] border overflow-hidden"
             style={{
-              background: "var(--card)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              boxShadow: "0 -2px 16px oklch(0 0 0 / 0.2)",
+              background: "color-mix(in oklch, var(--card) 85%, transparent)",
+              backdropFilter: "blur(32px) saturate(1.6)",
+              WebkitBackdropFilter: "blur(32px) saturate(1.6)",
+              borderColor: "color-mix(in oklch, var(--border) 60%, transparent)",
+              boxShadow: "0 -4px 32px oklch(0 0 0 / 0.3), 0 4px 16px oklch(0 0 0 / 0.2)",
             }}
           >
+            {/* Subtle gradient top line */}
+            <div
+              className="h-px w-full"
+              style={{ background: "var(--grad-primary)", opacity: 0.4 }}
+            />
             <div className="flex items-center justify-around px-1 py-2">
               {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
                 const isActive = location === path || location.startsWith(path + "/");
@@ -266,8 +258,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   >
                     {isActive && (
                       <div
-                        className="absolute inset-0 rounded-xl opacity-10"
-                        style={{ background: "var(--primary)" }}
+                        className="absolute inset-0 rounded-2xl opacity-15"
+                        style={{ background: "var(--grad-primary)" }}
                       />
                     )}
                     <div
