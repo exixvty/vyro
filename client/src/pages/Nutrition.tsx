@@ -5,6 +5,7 @@ import { Apple, Plus, Trash2, Brain, Loader2, ChevronDown, ChevronUp } from "luc
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { XPGainToast } from "@/components/Interactive";
 
 type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
@@ -36,6 +37,7 @@ const QUICK_FOODS = [
 export default function Nutrition() {
   const today = format(new Date(), "yyyy-MM-dd");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [xpGain, setXpGain] = useState<{ visible: boolean; amount: number }>({ visible: false, amount: 0 });
   const [selectedMeal, setSelectedMeal] = useState<MealType>("breakfast");
   const [form, setForm] = useState({ foodName: "", calories: "", proteinG: "", carbsG: "", fatG: "", servingSize: "" });
   const [showAISuggest, setShowAISuggest] = useState(false);
@@ -52,7 +54,9 @@ export default function Nutrition() {
       utils.nutrition.getDayLogs.invalidate();
       setShowAddForm(false);
       setForm({ foodName: "", calories: "", proteinG: "", carbsG: "", fatG: "", servingSize: "" });
-      toast.success("Food logged!");
+      setXpGain({ visible: true, amount: 20 });
+      setTimeout(() => setXpGain({ visible: false, amount: 0 }), 1000);
+      toast.success("Food logged! +20 XP 🍎");
     },
   });
 
@@ -108,6 +112,11 @@ export default function Nutrition() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* XP Gain Toast */}
+      <div className="fixed top-16 left-1/2 -translate-x-1/2 z-[80] pointer-events-none">
+        <XPGainToast amount={xpGain.amount} visible={xpGain.visible} />
+      </div>
+
       {/* Header */}
       <div className="px-5 pt-12 pb-4">
         <h1 className="text-2xl font-display font-bold text-foreground mb-1">Nutrition</h1>

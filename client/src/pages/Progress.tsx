@@ -5,6 +5,7 @@ import { Plus, TrendingUp, Trophy, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { ConfettiEffect, XPGainToast } from "@/components/Interactive";
 import {
   LineChart,
   Line,
@@ -262,13 +263,21 @@ function LogPRModal({ onClose }: { onClose: () => void }) {
   const [value, setValue] = useState("");
   const [unit, setUnit] = useState("kg");
 
+  const [showConfetti, setShowConfetti] = useState(false);
+
   const setRecord = trpc.progress.setRecord.useMutation({
-    onSuccess: () => { utils.progress.getRecords.invalidate(); onClose(); toast.success("New PR! +100 XP 🏆"); },
+    onSuccess: () => {
+      utils.progress.getRecords.invalidate();
+      setShowConfetti(true);
+      toast.success("New PR! +100 XP 🏆");
+      setTimeout(() => { setShowConfetti(false); onClose(); }, 1200);
+    },
   });
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end max-w-[430px] mx-auto">
-      <div className="w-full bg-card border-t border-border rounded-t-3xl p-6 animate-slide-up">
+      <div className="relative w-full bg-card border-t border-border rounded-t-3xl p-6 animate-slide-up">
+        <ConfettiEffect active={showConfetti} count={50} />
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-display font-bold text-lg">New Personal Record</h3>
           <button onClick={onClose}><X size={20} className="text-muted-foreground" /></button>

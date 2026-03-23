@@ -164,3 +164,18 @@
 - [x] Dashboard: hero orbs, ambient gradient, animated XP bar, gradient stat pills, noise overlay on CTA, gradient ring progress, motivational banner
 - [x] AppLayout: gradient top line, glow icons with drop-shadow, colorful More drawer with per-item accent colors
 - [x] All tests passing (11/11), zero TypeScript errors
+
+## Phase 21: Interactive & Satisfying UX
+- [x] Global interaction CSS: press/scale effects, spring transitions, active states
+- [x] AnimatedButton component with press ripple and spring scale
+- [x] PressCard component with satisfying depth press effect
+- [x] ConfettiEffect component for celebrations (level-up, workout complete)
+- [x] Animated number counters (count-up on mount)
+- [x] Staggered list entry animations
+- [x] Dashboard: animated XP bar fill, live counter updates, streak fire animation
+- [x] Workout: set-complete checkmark animation, rest timer pulse, finish confetti
+- [x] Library: card hover/press ripple, smooth filter transitions
+- [x] Tiers: tier card flip reveal, XP progress spring animation
+- [x] Page transitions: slide-in between routes
+- [x] Swipe gestures on cards (dismiss, favorite)
+- [x] Toast notifications with satisfying slide+bounce

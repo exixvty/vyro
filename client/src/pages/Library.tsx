@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Search, BookOpen, ChevronRight, Star, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
+import { PressCard } from "@/components/Interactive";
 
 const MUSCLE_ICONS: Record<string, string> = {
   chest: "💪",
@@ -254,14 +255,15 @@ export default function Library() {
             <p className="text-muted-foreground">No exercises found</p>
           </div>
         ) : (
-          filtered.map((exercise) => (
-            <div
+          filtered.map((exercise, idx) => (
+            <PressCard
               key={exercise.id}
               onClick={() => setSelected(exercise)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && setSelected(exercise)}
-              className="w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition text-left border border-border cursor-pointer"
+              className={cn(
+                "w-full p-3 rounded-2xl bg-muted/50 border border-border/60 hover-lift",
+                "stagger-children"
+              )}
+              depth="sm"
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
@@ -294,7 +296,7 @@ export default function Library() {
                   <ChevronRight className="text-muted-foreground" size={20} />
                 </div>
               </div>
-            </div>
+            </PressCard>
           ))
         )}
       </div>
@@ -302,7 +304,7 @@ export default function Library() {
       {/* Detail Modal */}
       {selected && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur flex items-end">
-          <div className="w-full bg-background rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto">
+          <div className="w-full bg-background rounded-t-3xl p-6 max-h-[80vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <span className="text-3xl">{MUSCLE_ICONS[selected.category] || "💪"}</span>
@@ -311,12 +313,12 @@ export default function Library() {
                   <p className="text-sm text-muted-foreground capitalize">{selected.category}</p>
                 </div>
               </div>
-              <button
-                onClick={() => setSelected(null)}
-                className="p-2 hover:bg-muted rounded-lg transition"
-              >
-                <X size={24} />
-              </button>
+                <button
+                  onClick={() => setSelected(null)}
+                  className="p-2 hover:bg-muted rounded-xl transition press-scale"
+                >
+                  <X size={24} />
+                </button>
             </div>
 
             <div className="space-y-4">
@@ -373,12 +375,21 @@ export default function Library() {
                 <Button
                   onClick={() => toggleFavorite(selected.id)}
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 press-scale"
                 >
-                  <Star size={18} className="mr-2" />
-                  {favorites.has(selected.id) ? "Favorited" : "Favorite"}
+                  <Star
+                    size={18}
+                    className={cn(
+                      "mr-2 transition-all duration-300",
+                      favorites.has(selected.id) ? "fill-yellow-400 text-yellow-400" : ""
+                    )}
+                  />
+                  {favorites.has(selected.id) ? "Favorited ⭐" : "Favorite"}
                 </Button>
-                <Button className="flex-1 bg-violet-500 hover:bg-violet-600">
+                <Button
+                  className="flex-1 press-scale"
+                  style={{ background: "var(--grad-primary)", boxShadow: "0 4px 16px var(--vyro-glow)" }}
+                >
                   Add to Workout
                 </Button>
               </div>

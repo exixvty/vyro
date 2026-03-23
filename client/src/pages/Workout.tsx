@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useLocation } from "wouter";
+import { CheckmarkButton, ConfettiEffect, XPGainToast } from "@/components/Interactive";
 
 /* ─── Types ───────────────────────────────────────────────────────────── */
 interface ExerciseFromDB {
@@ -490,13 +491,18 @@ function ActiveSession({
   const [restActive, setRestActive] = useState(false);
   const [rating, setRating] = useState(4);
   const [showFinishModal, setShowFinishModal] = useState(false);
+  const [showFinishConfetti, setShowFinishConfetti] = useState(false);
+  const [xpGain, setXpGain] = useState<{ visible: boolean; amount: number }>({ visible: false, amount: 0 });
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const restRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const logSession = trpc.workout.logSession.useMutation({
     onSuccess: (data) => {
-      toast.success(`Workout complete! +${data.xpEarned} XP`);
-      onFinish();
+      setShowFinishConfetti(true);
+      setXpGain({ visible: true, amount: data.xpEarned });
+      setTimeout(() => setXpGain({ visible: false, amount: 0 }), 1200);
+      toast.success(`Workout complete! +${data.xpEarned} XP 🎉`);
+      setTimeout(() => onFinish(), 1500);
     },
     onError: () => toast.error("Failed to save workout"),
   });
@@ -546,6 +552,9 @@ function ActiveSession({
 
     if (!set.completed) {
       startRest(ex.restSeconds);
+      // Show mini XP pop
+      setXpGain({ visible: true, amount: 5 });
+      setTimeout(() => setXpGain({ visible: false, amount: 0 }), 900);
     }
   };
 
@@ -572,6 +581,11 @@ function ActiveSession({
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
+      {/* XP Gain Toast */}
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[80] pointer-events-none">
+        <XPGainToast amount={xpGain.amount} visible={xpGain.visible} />
+      </div>
+
       {/* Header */}
       <div className="px-4 pt-12 pb-3 flex items-center justify-between border-b border-border bg-background">
         <button onClick={onCancel} className="flex items-center gap-1 text-muted-foreground">
@@ -592,18 +606,33 @@ function ActiveSession({
 
       {/* Rest Timer Banner */}
       {restActive && (
-        <div className="px-4 py-3 bg-primary/10 border-b border-primary/20 flex items-center justify-between">
+        <div
+          className="px-4 py-3 border-b border-primary/20 flex items-center justify-between"
+          style={{
+            background: "linear-gradient(90deg, oklch(0.67 0.24 290 / 0.12), oklch(0.72 0.22 340 / 0.08))",
+            animation: "pulse-bg 2s ease-in-out infinite",
+          }}
+        >
           <div className="flex items-center gap-2">
-            <Timer size={16} className="text-primary" />
-            <span className="text-sm font-semibold text-primary">Rest Timer</span>
+            <div className="relative">
+              <Timer size={16} className="text-primary" />
+              <span className="absolute inset-0 rounded-full border border-primary/40 animate-ping" />
+            </div>
+            <span className="text-sm font-semibold text-primary">Rest</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-2xl font-mono font-bold text-primary">
+            <span
+              className="text-2xl font-mono font-bold text-primary"
+              style={{
+                textShadow: "0 0 12px var(--vyro-glow)",
+                transition: "all 0.3s ease",
+              }}
+            >
               {Math.floor(restTimer / 60)}:{String(restTimer % 60).padStart(2, "0")}
             </span>
             <button
               onClick={() => { setRestActive(false); setRestTimer(0); }}
-              className="px-3 py-1 bg-primary/20 rounded-lg text-xs font-semibold text-primary"
+              className="px-3 py-1 bg-primary/20 rounded-lg text-xs font-semibold text-primary press-scale"
             >
               Skip
             </button>
@@ -654,7 +683,8 @@ function ActiveSession({
       {/* Finish Modal */}
       {showFinishModal && (
         <div className="fixed inset-0 z-[60] bg-black/60 flex items-end justify-center">
-          <div className="bg-card w-full max-w-[430px] rounded-t-3xl p-6 space-y-5 animate-slide-up">
+          <div className="relative bg-card w-full max-w-[430px] rounded-t-3xl p-6 space-y-5 animate-slide-up">
+            <ConfettiEffect active={showFinishConfetti} count={40} className="rounded-t-3xl" />
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-display font-bold text-foreground">Finish Workout?</h3>
               <button onClick={() => setShowFinishModal(false)} className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
@@ -767,10 +797,16 @@ function ActiveExerciseCard({
       {/* Sets */}
       <div className="px-4 space-y-1 pb-3">
         {exercise.sets.map((set) => (
-          <div key={set.id} className={cn(
-            "grid grid-cols-[36px_1fr_1fr_44px] gap-2 items-center py-1 rounded-lg transition-all",
-            set.completed ? "bg-green-500/10" : ""
-          )}>
+          <div
+            key={set.id}
+            className={cn(
+              "grid grid-cols-[36px_1fr_1fr_44px] gap-2 items-center py-1 rounded-lg",
+              set.completed ? "bg-green-500/10" : ""
+            )}
+            style={{
+              transition: "background 0.4s ease",
+            }}
+          >
             <div className={cn(
               "w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold mx-auto",
               set.type === "warmup" ? "bg-yellow-500/20 text-yellow-400" :
@@ -805,15 +841,12 @@ function ActiveExerciseCard({
               )}
             />
 
-            <button
-              onClick={() => onCompleteSet(set.id)}
-              className={cn(
-                "w-9 h-8 rounded-lg flex items-center justify-center mx-auto transition-all",
-                set.completed ? "bg-green-500 text-white" : "bg-muted hover:bg-green-500/20"
-              )}
-            >
-              <CheckCircle2 size={16} />
-            </button>
+            <div className="flex items-center justify-center">
+              <CheckmarkButton
+                checked={set.completed}
+                onChange={() => onCompleteSet(set.id)}
+              />
+            </div>
           </div>
         ))}
       </div>

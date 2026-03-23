@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -8,6 +8,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import TierBadge from "@/components/TierBadge";
+import { AnimatedCounter, PressCard, ConfettiEffect } from "@/components/Interactive";
 
 const MOTIVATION: Record<string, string[]> = {
   fat_loss:            ["Burn it. Every rep is a step closer 🔥", "Stay in your deficit. You're doing great.", "Sweat is just fat crying 💧"],
@@ -38,9 +39,42 @@ function Ring({ value, size = 64, stroke = 5, gradient }: {
         cx={size/2} cy={size/2} r={r} fill="none"
         stroke={`url(#${id})`} strokeWidth={stroke} strokeLinecap="round"
         strokeDasharray={circ} strokeDashoffset={offset}
-        style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1)" }}
+        style={{ transition: "stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1)" }}
       />
     </svg>
+  );
+}
+
+// ─── Animated XP Bar ─────────────────────────────────────────────────────────
+function XPBar({ pct }: { pct: number }) {
+  const [displayPct, setDisplayPct] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => setDisplayPct(pct), 300);
+    return () => clearTimeout(t);
+  }, [pct]);
+  return (
+    <div className="xp-bar">
+      <div className="xp-fill" style={{ width: `${displayPct}%`, transition: "width 1.2s cubic-bezier(0.4,0,0.2,1)" }} />
+    </div>
+  );
+}
+
+// ─── Streak Badge ─────────────────────────────────────────────────────────────
+function StreakBadge({ streak }: { streak: number }) {
+  const [pop, setPop] = useState(false);
+  useEffect(() => {
+    if (streak > 0) {
+      setPop(true);
+      const t = setTimeout(() => setPop(false), 600);
+      return () => clearTimeout(t);
+    }
+  }, [streak]);
+  if (streak <= 0) return null;
+  return (
+    <div className={cn("flex items-center gap-1.5 mt-2", pop && "animate-streak-pop")}>
+      <span className="text-lg fire-icon">🔥</span>
+      <span className="text-sm font-semibold text-orange-400">{streak} day streak</span>
+    </div>
   );
 }
 
@@ -48,6 +82,8 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [today] = useMemo(() => [format(new Date(), "yyyy-MM-dd")], []);
+  const [ctaConfetti, setCtaConfetti] = useState(false);
+  const [entered, setEntered] = useState(false);
 
   const { data: profile }          = trpc.profile.get.useQuery();
   const { data: gameStats }        = trpc.gamification.getStats.useQuery();
@@ -58,8 +94,13 @@ export default function Dashboard() {
   const { data: habitList }        = trpc.habits.list.useQuery();
   const { data: todayCompletions } = trpc.habits.getCompletions.useQuery({ date: today });
 
-  const totalCalories  = todayNutrition?.reduce((sum, l) => sum + l.calories, 0) ?? 0;
-  const calorieGoal    = nutritionGoals?.dailyCalories ?? 2000;
+  useEffect(() => {
+    const t = setTimeout(() => setEntered(true), 80);
+    return () => clearTimeout(t);
+  }, []);
+
+  const totalCalories   = todayNutrition?.reduce((sum, l) => sum + l.calories, 0) ?? 0;
+  const calorieGoal     = nutritionGoals?.dailyCalories ?? 2000;
   const calorieProgress = Math.min(100, (totalCalories / calorieGoal) * 100);
   const completedHabits = todayCompletions?.length ?? 0;
   const totalHabits     = habitList?.length ?? 0;
@@ -72,9 +113,9 @@ export default function Dashboard() {
     return "Good evening";
   };
 
-  const goalKey   = profile?.primaryGoal ?? "";
-  const msgs      = MOTIVATION[goalKey] ?? MOTIVATION["general_fitness"];
-  const motivationMsg = msgs[new Date().getDate() % msgs.length];
+  const goalKey        = profile?.primaryGoal ?? "";
+  const msgs           = MOTIVATION[goalKey] ?? MOTIVATION["general_fitness"];
+  const motivationMsg  = msgs[new Date().getDate() % msgs.length];
 
   const tier      = xpData?.currentTier ?? "Rookie";
   const level     = xpData?.currentLevel ?? 1;
@@ -83,8 +124,18 @@ export default function Dashboard() {
   const xpPct     = Math.min(100, (xpInLevel / 500) * 100);
   const streak    = gameStats?.workoutStreak ?? 0;
 
+  const handleStartWorkout = () => {
+    setCtaConfetti(true);
+    setTimeout(() => {
+      navigate("/workout");
+    }, 250);
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground pb-28 overflow-x-hidden">
+    <div className={cn(
+      "min-h-screen bg-background text-foreground pb-28 overflow-x-hidden",
+      entered ? "page-enter" : "opacity-0"
+    )}>
 
       {/* ── Hero Header ─────────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden px-5 pt-14 pb-8">
@@ -98,41 +149,36 @@ export default function Dashboard() {
             <h1 className="text-4xl font-display font-bold mt-1 leading-none">
               {user?.name?.split(" ")[0] || "Athlete"}
             </h1>
-            {streak > 0 && (
-              <div className="flex items-center gap-1.5 mt-2">
-                <span className="text-lg animate-streak">🔥</span>
-                <span className="text-sm font-semibold text-orange-400">{streak} day streak</span>
-              </div>
-            )}
+            <StreakBadge streak={streak} />
           </div>
 
           {/* Tier badge card */}
-          <button
+          <PressCard
             onClick={() => navigate("/tiers")}
-            className="card-glow px-3 py-2.5 flex items-center gap-2.5 animate-scale-in"
+            className="card-glow px-3 py-2.5 flex items-center gap-2.5"
           >
             <TierBadge tier={tier as any} level={level} size="sm" showLabel={false} />
             <div className="text-left">
               <p className="text-[10px] text-muted-foreground leading-none font-medium">{tier}</p>
               <p className="text-sm font-bold font-display leading-none mt-0.5 gradient-text">Lv.{level}</p>
             </div>
-          </button>
+          </PressCard>
         </div>
 
         {/* XP Bar */}
         <div className="relative z-10 mt-5">
           <div className="flex justify-between text-[11px] mb-1.5">
-            <span className="text-muted-foreground font-medium">{totalXP.toLocaleString()} XP total</span>
+            <span className="text-muted-foreground font-medium">
+              <AnimatedCounter value={totalXP} suffix=" XP total" duration={1000} />
+            </span>
             <span className="gradient-text font-semibold">{500 - xpInLevel} XP to level {level + 1}</span>
           </div>
-          <div className="xp-bar">
-            <div className="xp-fill" style={{ width: `${xpPct}%` }} />
-          </div>
+          <XPBar pct={xpPct} />
         </div>
       </div>
 
       {/* ── Stat Pills ──────────────────────────────────────────────────────── */}
-      <div className="px-5 mb-6">
+      <div className="px-5 mb-6 stagger-children">
         <div className="grid grid-cols-3 gap-3">
           {[
             {
@@ -140,23 +186,26 @@ export default function Dashboard() {
               value: gameStats?.totalWorkouts ?? 0,
               label: "Workouts",
               grad: ["oklch(0.67 0.24 290)", "oklch(0.72 0.22 340)"] as [string,string],
+              isNum: true,
             },
             {
               icon: <Flame size={16} />,
               value: streak,
               label: "Day Streak",
               grad: ["oklch(0.75 0.2 55)", "oklch(0.72 0.22 340)"] as [string,string],
+              isNum: true,
             },
             {
               icon: <Zap size={16} />,
-              value: `Lv.${level}`,
+              value: level,
               label: "Current Level",
               grad: ["oklch(0.80 0.2 85)", "oklch(0.75 0.2 55)"] as [string,string],
+              isNum: true,
             },
-          ].map(({ icon, value, label, grad }, i) => (
+          ].map(({ icon, value, label, grad, isNum }, i) => (
             <div
               key={i}
-              className="relative overflow-hidden rounded-2xl p-3.5 border border-white/5"
+              className="relative overflow-hidden rounded-2xl p-3.5 border border-white/5 press-scale hover-lift"
               style={{
                 background: `linear-gradient(145deg, ${grad[0]}18, ${grad[1]}0a)`,
                 boxShadow: `0 4px 20px ${grad[0]}20`,
@@ -168,7 +217,13 @@ export default function Dashboard() {
               >
                 <span style={{ color: grad[0] }}>{icon}</span>
               </div>
-              <p className="text-xl font-display font-bold leading-none">{value}</p>
+              <p className="text-xl font-display font-bold leading-none">
+                {isNum ? (
+                  <AnimatedCounter value={value as number} duration={900} />
+                ) : (
+                  `Lv.${value}`
+                )}
+              </p>
               <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{label}</p>
               {/* Decorative orb */}
               <div
@@ -182,38 +237,39 @@ export default function Dashboard() {
 
       {/* ── Start Workout CTA ───────────────────────────────────────────────── */}
       <div className="px-5 mb-6">
-        <button
-          onClick={() => navigate("/workout")}
-          className="w-full relative overflow-hidden rounded-3xl p-5 flex items-center justify-between group transition-all active:scale-[0.97]"
-          style={{
-            background: "var(--grad-primary)",
-            boxShadow: "0 12px 40px var(--vyro-glow), 0 4px 16px oklch(0 0 0 / 0.3)",
-          }}
-        >
-          {/* Noise overlay */}
-          <div
-            className="absolute inset-0 opacity-20 rounded-3xl"
+        <div className="relative">
+          <ConfettiEffect active={ctaConfetti} count={28} className="rounded-3xl" />
+          <button
+            onClick={handleStartWorkout}
+            className="w-full relative overflow-hidden rounded-3xl p-5 flex items-center justify-between group ripple press-scale-lg cta-pulse"
             style={{
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
+              background: "var(--grad-primary)",
+              boxShadow: "0 12px 40px var(--vyro-glow), 0 4px 16px oklch(0 0 0 / 0.3)",
             }}
-          />
-          {/* Shimmer */}
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl animate-shimmer" />
+          >
+            {/* Noise overlay */}
+            <div
+              className="absolute inset-0 opacity-20 rounded-3xl"
+              style={{
+                backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
+              }}
+            />
 
-          <div className="relative flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-              <Play size={26} className="text-white" fill="white" />
+            <div className="relative flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                <Play size={26} className="text-white" fill="white" />
+              </div>
+              <div className="text-left">
+                <p className="font-display font-bold text-white text-xl leading-tight">Start Workout</p>
+                <p className="text-white/70 text-sm mt-0.5">Build your session</p>
+              </div>
             </div>
-            <div className="text-left">
-              <p className="font-display font-bold text-white text-xl leading-tight">Start Workout</p>
-              <p className="text-white/70 text-sm mt-0.5">Build your session</p>
-            </div>
-          </div>
-          <ChevronRight
-            size={22}
-            className="relative text-white/70 group-hover:translate-x-1.5 transition-transform duration-300"
-          />
-        </button>
+            <ChevronRight
+              size={22}
+              className="relative text-white/70 group-hover:translate-x-1.5 transition-transform duration-300"
+            />
+          </button>
+        </div>
       </div>
 
       {/* ── Today's Progress ────────────────────────────────────────────────── */}
@@ -221,13 +277,13 @@ export default function Dashboard() {
         <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3 font-semibold">Today</p>
         <div className="grid grid-cols-2 gap-3">
           {/* Calories */}
-          <button
+          <PressCard
             onClick={() => navigate("/nutrition")}
-            className="relative overflow-hidden rounded-2xl p-4 border border-white/5 text-left transition-all active:scale-[0.97]"
+            className="relative overflow-hidden rounded-2xl p-4 border border-white/5 text-left hover-lift"
             style={{
               background: "linear-gradient(145deg, oklch(0.72 0.2 145 / 0.12), oklch(0.72 0.18 200 / 0.06))",
               boxShadow: "0 4px 20px oklch(0.72 0.2 145 / 0.15)",
-            }}
+            } as React.CSSProperties}
           >
             <div className="flex items-center gap-3">
               <div className="relative shrink-0">
@@ -237,7 +293,9 @@ export default function Dashboard() {
                 </div>
               </div>
               <div>
-                <p className="text-xl font-display font-bold leading-none">{Math.round(totalCalories)}</p>
+                <p className="text-xl font-display font-bold leading-none">
+                  <AnimatedCounter value={totalCalories} duration={800} />
+                </p>
                 <p className="text-[11px] text-muted-foreground mt-1">of {calorieGoal} kcal</p>
               </div>
             </div>
@@ -245,16 +303,16 @@ export default function Dashboard() {
               className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full opacity-15 blur-2xl"
               style={{ background: "oklch(0.72 0.2 145)" }}
             />
-          </button>
+          </PressCard>
 
           {/* Habits */}
-          <button
+          <PressCard
             onClick={() => navigate("/habits")}
-            className="relative overflow-hidden rounded-2xl p-4 border border-white/5 text-left transition-all active:scale-[0.97]"
+            className="relative overflow-hidden rounded-2xl p-4 border border-white/5 text-left hover-lift"
             style={{
               background: "linear-gradient(145deg, oklch(0.75 0.2 55 / 0.12), oklch(0.72 0.22 340 / 0.06))",
               boxShadow: "0 4px 20px oklch(0.75 0.2 55 / 0.15)",
-            }}
+            } as React.CSSProperties}
           >
             <div className="flex items-center gap-3">
               <div className="relative shrink-0">
@@ -264,7 +322,10 @@ export default function Dashboard() {
                 </div>
               </div>
               <div>
-                <p className="text-xl font-display font-bold leading-none">{completedHabits}/{totalHabits}</p>
+                <p className="text-xl font-display font-bold leading-none">
+                  <AnimatedCounter value={completedHabits} duration={600} />
+                  <span className="text-muted-foreground text-base">/{totalHabits}</span>
+                </p>
                 <p className="text-[11px] text-muted-foreground mt-1">habits done</p>
               </div>
             </div>
@@ -272,7 +333,7 @@ export default function Dashboard() {
               className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full opacity-15 blur-2xl"
               style={{ background: "oklch(0.75 0.2 55)" }}
             />
-          </button>
+          </PressCard>
         </div>
       </div>
 
@@ -308,15 +369,14 @@ export default function Dashboard() {
               See all →
             </button>
           </div>
-          <div className="space-y-2">
-            {recentSessions.map((session, i) => (
-              <div
+          <div className="space-y-2 stagger-children">
+            {recentSessions.map((session) => (
+              <PressCard
                 key={session.id}
-                className="flex items-center gap-3 p-3.5 rounded-2xl border border-white/5 transition-all active:scale-[0.98]"
+                className="flex items-center gap-3 p-3.5 rounded-2xl border border-white/5 hover-lift"
                 style={{
                   background: "var(--vyro-surface)",
-                  animationDelay: `${i * 60}ms`,
-                }}
+                } as React.CSSProperties}
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -331,7 +391,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <ChevronRight size={14} className="text-muted-foreground shrink-0" />
-              </div>
+              </PressCard>
             ))}
           </div>
         </div>
@@ -357,14 +417,15 @@ export default function Dashboard() {
               grad: ["oklch(0.80 0.2 85)", "oklch(0.75 0.2 55)"] as [string,string],
             },
           ].map(({ label, sub, icon: Icon, path, grad }) => (
-            <button
+            <PressCard
               key={path}
               onClick={() => navigate(path)}
-              className="relative overflow-hidden rounded-2xl p-4 border border-white/5 text-left transition-all active:scale-[0.97]"
+              className="relative overflow-hidden rounded-2xl p-4 border border-white/5 text-left hover-lift hover-glow"
               style={{
                 background: `linear-gradient(145deg, ${grad[0]}15, ${grad[1]}08)`,
                 boxShadow: `0 4px 20px ${grad[0]}15`,
-              }}
+                "--vyro-glow": `${grad[0]}60`,
+              } as React.CSSProperties}
             >
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
@@ -378,7 +439,7 @@ export default function Dashboard() {
                 className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full opacity-15 blur-2xl"
                 style={{ background: grad[0] }}
               />
-            </button>
+            </PressCard>
           ))}
         </div>
       </div>

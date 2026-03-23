@@ -5,6 +5,7 @@ import { Plus, Flame, CheckCircle2, Circle, Trash2, X, Loader2 } from "lucide-re
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { CheckmarkButton, XPGainToast } from "@/components/Interactive";
 
 const HABIT_ICONS = ["💪", "🏃", "🥗", "💧", "😴", "🧘", "📚", "🚴", "🏊", "⚽", "🎯", "🔥"];
 const HABIT_COLORS = ["violet", "blue", "green", "orange", "red", "pink"];
@@ -20,13 +21,20 @@ const COLOR_MAP: Record<string, string> = {
 export default function Habits() {
   const today = format(new Date(), "yyyy-MM-dd");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [xpGain, setXpGain] = useState<{ visible: boolean; amount: number }>({ visible: false, amount: 0 });
 
   const utils = trpc.useUtils();
   const { data: habitList } = trpc.habits.list.useQuery();
   const { data: completions } = trpc.habits.getCompletions.useQuery({ date: today });
 
   const completeHabit = trpc.habits.complete.useMutation({
-    onSuccess: () => { utils.habits.getCompletions.invalidate(); utils.habits.list.invalidate(); },
+    onSuccess: () => {
+      utils.habits.getCompletions.invalidate();
+      utils.habits.list.invalidate();
+      setXpGain({ visible: true, amount: 30 });
+      setTimeout(() => setXpGain({ visible: false, amount: 0 }), 1000);
+      toast.success("Habit done! +30 XP 🔥");
+    },
     onError: () => toast.error("Failed to update habit"),
   });
 
@@ -41,6 +49,11 @@ export default function Habits() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* XP Gain Toast */}
+      <div className="fixed top-16 left-1/2 -translate-x-1/2 z-[80] pointer-events-none">
+        <XPGainToast amount={xpGain.amount} visible={xpGain.visible} />
+      </div>
+
       {/* Header */}
       <div className="px-5 pt-12 pb-4">
         <h1 className="text-2xl font-display font-bold text-foreground mb-1">Habits</h1>
@@ -89,16 +102,28 @@ export default function Habits() {
             const colorClass = COLOR_MAP[habit.color] || COLOR_MAP.violet;
 
             return (
-              <div key={habit.id}
-                className={cn("flex items-center gap-4 p-4 rounded-2xl border transition-all",
-                  isCompleted ? "border-green-500/30 bg-green-500/5" : "border-border bg-card")}>
-                <button
-                  onClick={() => !isCompleted && completeHabit.mutate({ habitId: habit.id, date: today })}
-                  className={cn("w-12 h-12 rounded-2xl border flex items-center justify-center text-xl transition-all shrink-0",
-                    isCompleted ? "bg-green-500/20 border-green-500/30" : colorClass)}
-                >
-                  {isCompleted ? "✅" : habit.icon}
-                </button>
+              <div
+                key={habit.id}
+                className={cn(
+                  "flex items-center gap-4 p-4 rounded-2xl border press-scale",
+                  isCompleted ? "border-green-500/30 bg-green-500/5" : "border-border bg-card"
+                )}
+                style={{ transition: "background 0.4s ease, border-color 0.4s ease, transform 0.15s ease" }}
+              >
+                <div className="relative shrink-0">
+                  {isCompleted ? (
+                    <div className={cn("w-12 h-12 rounded-2xl border flex items-center justify-center text-xl", "bg-green-500/20 border-green-500/30")}>
+                      <span style={{ animation: "pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>✅</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => completeHabit.mutate({ habitId: habit.id, date: today })}
+                      className={cn("w-12 h-12 rounded-2xl border flex items-center justify-center text-xl transition-all", colorClass)}
+                    >
+                      {habit.icon}
+                    </button>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className={cn("font-semibold text-sm", isCompleted ? "line-through text-muted-foreground" : "text-foreground")}>
                     {habit.name}
