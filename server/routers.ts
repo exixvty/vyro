@@ -9,6 +9,7 @@ import { friendsRouter } from "./routers/friends";
 import { exercisesRouter } from "./routers/exercises";
 import { workoutsRouter } from "./routers/workouts";
 import { engagementRouter } from "./routers/engagement";
+import { themeRouter } from "./routers/theme";
 
 import {
   userProfiles,
@@ -28,6 +29,7 @@ import {
   users,
   friendships,
   referralCodes,
+  themePreferences,
 } from "../drizzle/schema";
 import { eq, and, desc, sql, inArray, or, ne } from "drizzle-orm";
 
@@ -704,6 +706,7 @@ export const appRouter = router({
   exercises: exercisesRouter,
   workouts: workoutsRouter,
   engagement: engagementRouter,
+  theme: themeRouter,
 });
 
 export type AppRouter = typeof appRouter;

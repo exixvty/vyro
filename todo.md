@@ -179,3 +179,18 @@
 - [x] Page transitions: slide-in between routes
 - [x] Swipe gestures on cards (dismiss, favorite)
 - [x] Toast notifications with satisfying slide+bounce
+
+
+## Phase 24: Full UI Customization System
+- [x] Database: add theme_preferences table (userId, primaryColor, accentColor, buttonStyle, fontFamily, logoUrl, appName)
+- [x] ThemeContext: manage user theme state, load from DB, persist changes
+- [x] Appearance settings page: color swatches, accent picker, button style selector, font picker, logo upload, app name input
+- [x] Live preview in settings: show changes in real-time before saving
+- [x] Wire ThemeContext into AppLayout: CSS variables update dynamically across all pages
+- [x] Preset themes: 5-6 curated color palettes (Neon, Sunset, Ocean, Forest, Cyberpunk, etc.)
+- [x] Button style variants: solid, outline, gradient, glassmorphism
+- [x] Font options: Inter, Space Grotesk, Syne, Poppins, Roboto
+- [x] Logo upload to S3 and display in nav/header
+- [x] App name customization (replaces "VYRO" in nav and header)
+- [x] UI cleanup: tighten spacing, reduce padding, simplify card shadows, cleaner borders
+- [x] Test all customization flows and persistence

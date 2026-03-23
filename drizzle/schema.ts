@@ -435,3 +435,28 @@ export const beastMode = mysqlTable("beast_mode", {
 
 export type BeastMode = typeof beastMode.$inferSelect;
 export type InsertBeastMode = typeof beastMode.$inferInsert;
+
+
+// ─── Theme Preferences ────────────────────────────────────────────────────────
+export const themePreferences = mysqlTable("theme_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  // Color scheme
+  primaryColor: varchar("primaryColor", { length: 20 }).default("violet").notNull(),
+  accentColor: varchar("accentColor", { length: 20 }).default("cyan").notNull(),
+  secondaryColor: varchar("secondaryColor", { length: 20 }).default("pink").notNull(),
+  // Button style: solid, outline, gradient, glassmorphism
+  buttonStyle: mysqlEnum("buttonStyle", ["solid", "outline", "gradient", "glassmorphism"]).default("solid").notNull(),
+  // Font: inter, space-grotesk, syne, poppins, roboto
+  fontFamily: mysqlEnum("fontFamily", ["inter", "space-grotesk", "syne", "poppins", "roboto"]).default("inter").notNull(),
+  // Branding
+  appName: varchar("appName", { length: 100 }).default("VYRO").notNull(),
+  logoUrl: text("logoUrl"),
+  // Preset theme: custom, neon, sunset, ocean, forest, cyberpunk
+  presetTheme: mysqlEnum("presetTheme", ["custom", "neon", "sunset", "ocean", "forest", "cyberpunk"]).default("custom").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ThemePreference = typeof themePreferences.$inferSelect;
+export type InsertThemePreference = typeof themePreferences.$inferInsert;
