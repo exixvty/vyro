@@ -69,7 +69,7 @@ export default function Library() {
     // Filter by equipment
     if (equipment !== "all") {
       results = results.filter((ex) => {
-        const exEquip = JSON.parse(ex.equipment as string);
+        const exEquip = Array.isArray(ex.equipment) ? ex.equipment : JSON.parse(String(ex.equipment));
         return exEquip.includes(equipment);
       });
     }
@@ -272,7 +272,7 @@ export default function Library() {
                   <div className="text-xs text-muted-foreground space-x-2">
                     <span className="capitalize">{exercise.type}</span>
                     <span>•</span>
-                    <span>{JSON.parse(exercise.equipment as string).join(", ")}</span>
+                    <span>{(Array.isArray(exercise.equipment) ? exercise.equipment : []).join(", ")}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -337,7 +337,7 @@ export default function Library() {
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50">
                   <p className="text-xs text-muted-foreground mb-1">Equipment</p>
-                  <p className="font-semibold text-sm">{JSON.parse(selected.equipment as string).length}</p>
+                  <p className="font-semibold text-sm">{(Array.isArray(selected.equipment) ? selected.equipment : []).length}</p>
                 </div>
               </div>
 
@@ -345,7 +345,7 @@ export default function Library() {
               <div>
                 <h3 className="font-semibold mb-2">Equipment</h3>
                 <div className="flex flex-wrap gap-2">
-                  {JSON.parse(selected.equipment as string).map((eq: string) => (
+                  {(Array.isArray(selected.equipment) ? selected.equipment : []).map((eq: string) => (
                     <span key={eq} className="px-3 py-1 rounded-full bg-violet-500/20 text-violet-400 text-sm capitalize">
                       {eq}
                     </span>
@@ -357,7 +357,7 @@ export default function Library() {
               <div>
                 <h3 className="font-semibold mb-2">Muscle Groups</h3>
                 <div className="flex flex-wrap gap-2">
-                  {JSON.parse(selected.muscleGroups as string).map((muscle: string) => (
+                  {(Array.isArray(selected.muscleGroups) ? selected.muscleGroups : []).map((muscle: string) => (
                     <span key={muscle} className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-sm capitalize">
                       {muscle}
                     </span>

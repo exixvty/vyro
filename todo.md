@@ -109,3 +109,7 @@
 - [x] Workout history tab with session cards
 - [x] Seeded 324 exercises into database across all 11 muscle groups
 - [x] All tests passing (11/11), zero TypeScript errors
+
+
+## Bug Fixes
+- [x] Fix JSON parsing error on /library — equipment/muscleGroups already parsed by Drizzle json(), removed redundant JSON.parse()

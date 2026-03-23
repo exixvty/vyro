@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, name, equipment, muscleGroups FROM exercises LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3SJBdNXrBo7A2K3.root --database ABaDZShuwigi7srSSPoYho --execute SELECT id, name, equipment, muscleGroups FROM exercises LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Barbell Bench Press",
+      "equipment": "[\"barbell\", \"bench\"]",
+      "muscleGroups": "[\"chest\", \"triceps\", \"shoulders\"]"
+    },
+    {
+      "id": "2",
+      "name": "Dumbbell Bench Press",
+      "equipment": "[\"dumbbells\", \"bench\"]",
+      "muscleGroups": "[\"chest\", \"triceps\", \"shoulders\"]"
+    },
+    {
+      "id": "3",
+      "name": "Incline Barbell Bench Press",
+      "equipment": "[\"barbell\", \"incline bench\"]",
+      "muscleGroups": "[\"upper chest\", \"shoulders\", \"triceps\"]"
+    },
+    {
+      "id": "4",
+      "name": "Incline Dumbbell Bench Press",
+      "equipment": "[\"dumbbells\", \"incline bench\"]",
+      "muscleGroups": "[\"upper chest\", \"shoulders\", \"triceps\"]"
+    },
+    {
+      "id": "5",
+      "name": "Decline Barbell Bench Press",
+      "equipment": "[\"barbell\", \"decline bench\"]",
+      "muscleGroups": "[\"lower chest\", \"triceps\"]"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tequipment\tmuscleGroups\n1\tBarbell Bench Press\t[\"barbell\", \"bench\"]\t[\"chest\", \"triceps\", \"shoulders\"]\n2\tDumbbell Bench Press\t[\"dumbbells\", \"bench\"]\t[\"chest\", \"triceps\", \"shoulders\"]\n3\tIncline Barbell Bench Press\t[\"barbell\", \"incline bench\"]\t[\"upper chest\", \"shoulders\", \"triceps\"]\n4\tIncline Dumbbell Bench Press\t[\"dumbbells\", \"incline bench\"]\t[\"upper chest\", \"shoulders\", \"triceps\"]\n5\tDecline Barbell Bench Press\t[\"barbell\", \"decline bench\"]\t[\"lower chest\", \"triceps\"]\n",
+  "stderr": "",
+  "execution_time_ms": 1610
+}

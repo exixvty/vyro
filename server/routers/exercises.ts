@@ -42,7 +42,7 @@ export const exercisesRouter = router({
       if (!db) return [];
       const all = await db.select().from(exercises);
       return all.filter((ex) => {
-        const groups = JSON.parse(ex.muscleGroups as string);
+        const groups = Array.isArray(ex.muscleGroups) ? ex.muscleGroups : JSON.parse(String(ex.muscleGroups));
         return groups.includes(input.muscleGroup);
       });
     }),
@@ -73,7 +73,7 @@ export const exercisesRouter = router({
       if (!db) return [];
       const all = await db.select().from(exercises);
       return all.filter((ex) => {
-        const equip = JSON.parse(ex.equipment as string);
+        const equip = Array.isArray(ex.equipment) ? ex.equipment : JSON.parse(String(ex.equipment));
         return equip.includes(input.equipment);
       });
     }),
@@ -117,14 +117,14 @@ export const exercisesRouter = router({
 
       if (input.muscleGroup) {
         results = results.filter((ex) => {
-          const groups = JSON.parse(ex.muscleGroups as string);
+          const groups = Array.isArray(ex.muscleGroups) ? ex.muscleGroups : JSON.parse(String(ex.muscleGroups));
           return groups.includes(input.muscleGroup);
         });
       }
 
       if (input.equipment) {
         results = results.filter((ex) => {
-          const equip = JSON.parse(ex.equipment as string);
+          const equip = Array.isArray(ex.equipment) ? ex.equipment : JSON.parse(String(ex.equipment));
           return equip.includes(input.equipment);
         });
       }
@@ -172,7 +172,7 @@ export const exercisesRouter = router({
     const all = await db.select().from(exercises);
     const equipmentSet = new Set<string>();
     all.forEach((ex) => {
-      const equip = JSON.parse(ex.equipment as string);
+      const equip = Array.isArray(ex.equipment) ? ex.equipment : JSON.parse(String(ex.equipment));
       equip.forEach((e: string) => equipmentSet.add(e));
     });
     return Array.from(equipmentSet).sort();
