@@ -140,3 +140,11 @@
 - [x] Leaderboard with top 5 players and their XP
 - [x] Tier details modal with XP ranges
 - [x] All tests passing (11/11), zero TypeScript errors
+
+
+## Phase 18: Tier Perks & Trophies
+- [x] Design exclusive perks for each tier (1-6 perks per tier)
+- [x] Build TierPerks component with icon and description display
+- [x] Integrate perks into Tiers page (main section + modal)
+- [x] Perks include: badges, custom notes, templates, 2x/3x/5x XP, Beast Mode, AI Coach, VIP community
+- [x] All tests passing (11/11), zero TypeScript errors

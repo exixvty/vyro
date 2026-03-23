@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import TierBadge from "@/components/TierBadge";
-import { Loader2 } from "lucide-react";
+import TierPerks from "@/components/TierPerks";
+import { Loader2, Sparkles } from "lucide-react";
 
 const TIER_PROGRESSION = [
   { tier: "Rookie", icon: "🥉", minXP: 0, maxXP: 499, color: "from-slate-400 to-slate-600" },
@@ -163,6 +164,15 @@ export default function Tiers() {
         </div>
       </div>
 
+      {/* Tier Perks Section */}
+      <div className="p-4">
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <Sparkles size={20} className="text-violet-400" />
+          Your Tier Perks
+        </h3>
+        <TierPerks tier={userXP?.currentTier || "Rookie"} />
+      </div>
+
       {/* Tier Details Modal */}
       {selectedTier && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur flex items-end">
@@ -194,6 +204,14 @@ export default function Tiers() {
                     : TIER_PROGRESSION.find((t) => t.tier === selectedTier)?.maxXP.toLocaleString()}{" "}
                   XP
                 </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold mb-3 flex items-center gap-2">
+                  <Sparkles size={18} className="text-violet-400" />
+                  Tier Perks
+                </h3>
+                <TierPerks tier={selectedTier as any} showAll />
               </div>
 
               <button
