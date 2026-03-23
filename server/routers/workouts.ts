@@ -14,14 +14,14 @@ export const workoutsRouter = router({
       const db = await getDb();
       if (!db) throw new Error("Database not available");
 
-      await db.insert(workoutSessions).values({
+      const [result] = await db.insert(workoutSessions).values({
         userId: ctx.user.id,
         title: input.name,
         notes: input.description,
         type: "strength",
       });
 
-      return { success: true };
+      return { success: true, sessionId: result.insertId };
     }),
 
   getActiveSession: protectedProcedure
@@ -73,14 +73,14 @@ export const workoutsRouter = router({
 
       const order = logs.length + 1;
 
-      await db.insert(workoutExerciseLogs).values({
+      const [logResult] = await db.insert(workoutExerciseLogs).values({
         workoutSessionId: input.workoutSessionId,
         exerciseId: input.exerciseId,
         order,
         superset: input.superset || null,
       });
 
-      return { success: true };
+      return { success: true, exerciseLogId: logResult.insertId };
     }),
 
   getExercises: protectedProcedure
@@ -114,7 +114,7 @@ export const workoutsRouter = router({
       const db = await getDb();
       if (!db) throw new Error("Database not available");
 
-      await db.insert(workoutSets).values({
+      const [setResult] = await db.insert(workoutSets).values({
         workoutExerciseLogId: input.workoutExerciseLogId,
         setNumber: input.setNumber,
         reps: input.reps || null,
@@ -128,7 +128,7 @@ export const workoutsRouter = router({
         completedAt: new Date(),
       });
 
-      return { success: true };
+      return { success: true, setId: setResult.insertId };
     }),
 
   getSets: protectedProcedure
@@ -208,6 +208,7 @@ export const workoutsRouter = router({
           durationMinutes: input.durationMinutes,
           caloriesBurned: input.caloriesBurned || null,
           rating: input.rating || null,
+          completedAt: new Date(),
         })
         .where(eq(workoutSessions.id, input.workoutSessionId));
 

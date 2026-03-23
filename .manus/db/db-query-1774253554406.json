@@ -1,0 +1,65 @@
+{
+  "query": "SELECT COUNT(*) as total, category, COUNT(*) as count FROM exercises GROUP BY category ORDER BY category;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3SJBdNXrBo7A2K3.root --database ABaDZShuwigi7srSSPoYho --execute SELECT COUNT(*) as total, category, COUNT(*) as count FROM exercises GROUP BY category ORDER BY category;",
+  "rows": [
+    {
+      "total": "40",
+      "category": "chest",
+      "count": "40"
+    },
+    {
+      "total": "40",
+      "category": "back",
+      "count": "40"
+    },
+    {
+      "total": "34",
+      "category": "shoulders",
+      "count": "34"
+    },
+    {
+      "total": "26",
+      "category": "biceps",
+      "count": "26"
+    },
+    {
+      "total": "24",
+      "category": "triceps",
+      "count": "24"
+    },
+    {
+      "total": "15",
+      "category": "forearms",
+      "count": "15"
+    },
+    {
+      "total": "42",
+      "category": "legs",
+      "count": "42"
+    },
+    {
+      "total": "20",
+      "category": "glutes",
+      "count": "20"
+    },
+    {
+      "total": "29",
+      "category": "core",
+      "count": "29"
+    },
+    {
+      "total": "26",
+      "category": "cardio",
+      "count": "26"
+    },
+    {
+      "total": "28",
+      "category": "functional",
+      "count": "28"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\tcategory\tcount\n40\tchest\t40\n40\tback\t40\n34\tshoulders\t34\n26\tbiceps\t26\n24\ttriceps\t24\n15\tforearms\t15\n42\tlegs\t42\n20\tglutes\t20\n29\tcore\t29\n26\tcardio\t26\n28\tfunctional\t28\n",
+  "stderr": "",
+  "execution_time_ms": 1581
+}

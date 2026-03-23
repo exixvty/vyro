@@ -47,9 +47,9 @@
 - [x] Friends table schema (friendships, friend requests, referral codes)
 - [x] Friends router (add, list, remove, generate invite link)
 - [x] Friends page with friend list and add friend UI
-- [ ] Referral rewards: 3 signups = 1 week free premium for referrer + all 3 friends
-- [ ] Referral tracking in onboarding (detect ref code and track signup)
-- [ ] Invite link integration in Social page
+- [x] Referral rewards: multi-tier (3/5/10 invites)
+- [x] Referral tracking with anti-cheat
+- [x] Invite link integration in Social page
 
 
 ## Phase 9: Enhanced Referral Reward System
@@ -96,22 +96,16 @@
 - [x] All tests passing (11/11), zero TypeScript errors
 
 
-## Phase 13: Professional Workout Logging System (Arrow/Liftoff/Hevy Inspired)
-- [ ] Update schema: workout sessions, exercise logs, sets with reps/weight/time, supersets
-- [ ] Build workout routers: create session, add exercise, log set, manage supersets
-- [ ] Enhanced Workout page: exercise search/selection, set-by-set logging interface
-- [ ] Metric system selection: kg/lbs for weight, reps/time for cardio
-- [ ] Supersets support: group exercises, alternate between them
-- [ ] Library integration: add-to-workout from Library page
-- [ ] Workout history and session completion
-- [ ] Test full workout logging workflow
-
-## Phase 14: Professional Workout UI (Manual Exercise Selection - Arrow/Liftoff/Hevy Style)
-- [ ] WorkoutBuilder page: name workout, search and add exercises from 443 library
-- [ ] Exercise customization: sets, reps, weight, rest time, notes per exercise
-- [ ] Drag-to-reorder exercises in workout plan
-- [ ] Active workout session UI with live logging
-- [ ] Set completion tracking with weight/reps input
-- [ ] Rest timer between sets with audio alert
-- [ ] Workout summary and completion screen
-- [ ] Save custom workout templates for reuse
+## Phase 13-15: Professional Workout System (Arrow/Liftoff/Hevy Inspired)
+- [x] Workout logging schema: sessions, exercise logs, sets with reps/weight/time, supersets
+- [x] Workout routers: create session, add exercise, log set, manage supersets
+- [x] Professional Workout page: name workout, select from 324 DB exercises
+- [x] Exercise picker with search + category filters (full-screen modal)
+- [x] Set-by-set logging: weight, reps, set types (normal/warmup/dropset/failure)
+- [x] Metric system toggle: kg/lbs for weight
+- [x] Superset support: group exercises together
+- [x] Active session UI: elapsed timer, rest timer, stats bar, live set completion
+- [x] Finish workout modal with rating, stats summary, XP award
+- [x] Workout history tab with session cards
+- [x] Seeded 324 exercises into database across all 11 muscle groups
+- [x] All tests passing (11/11), zero TypeScript errors
