@@ -21,6 +21,7 @@ import Premium from "./pages/Premium";
 import Referral from "./pages/Referral";
 import Friends from "./pages/Friends";
 import WorkoutBuilder from "./pages/WorkoutBuilder";
+import Tiers from "./pages/Tiers";
 import AppLayout from "./components/AppLayout";
 
 function Router() {
@@ -67,6 +68,9 @@ function Router() {
       </Route>
       <Route path="/friends">
         <AppLayout><Friends /></AppLayout>
+      </Route>
+      <Route path="/tiers">
+        <AppLayout><Tiers /></AppLayout>
       </Route>
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

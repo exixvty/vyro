@@ -130,3 +130,13 @@
 - [ ] Smart notifications: motivational, non-spammy, toggleable (UI)
 - [ ] Personalized motivation messages based on user goals (UI)
 - [ ] Performance optimization and testing
+
+
+## Phase 17: Visible Tier Ranking System (Liftoff-Inspired)
+- [x] Tier badge component with visual progression (6 tiers with icons and colors)
+- [x] Tier ranking page with leaderboard and tier progression visualization
+- [x] Tier display integrated in AppLayout navigation
+- [x] Tier progression chart showing all 6 tiers (Rookie→Legend)
+- [x] Leaderboard with top 5 players and their XP
+- [x] Tier details modal with XP ranges
+- [x] All tests passing (11/11), zero TypeScript errors

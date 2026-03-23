@@ -27,6 +27,7 @@ const NAV_ITEMS = [
 const MORE_ITEMS = [
   { path: "/habits", icon: CheckSquare, label: "Habits" },
   { path: "/library", icon: BookOpen, label: "Library" },
+  { path: "/tiers", icon: Trophy, label: "Tiers" },
   { path: "/gamification", icon: Trophy, label: "Achievements" },
   { path: "/referral", icon: Gift, label: "Referrals" },
   { path: "/social", icon: Users, label: "Community" },
