@@ -20,6 +20,7 @@ import {
   BarChart2,
   Sparkles,
   Palette,
+  Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +41,7 @@ const MORE_ITEMS = [
   { path: "/referral",     icon: Gift,        label: "Referrals",    color: "oklch(0.75 0.2 55)" },
   { path: "/social",       icon: Users,       label: "Community",    color: "oklch(0.72 0.18 200)" },
   { path: "/appearance",   icon: Palette,     label: "Appearance",   color: "oklch(0.68 0.26 320)" },
+  { path: "/notifications", icon: Bell,        label: "Notifications", color: "oklch(0.72 0.18 200)" },
 ];
 
 /* ─── NavButton — press-scale with spring return ─────────────────────── */

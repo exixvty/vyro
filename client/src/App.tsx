@@ -24,7 +24,9 @@ import WorkoutBuilder from "./pages/WorkoutBuilder";
 import Tiers from "./pages/Tiers";
 import Performance from "./pages/Performance";
 import Appearance from "./pages/Appearance";
+import Notifications from "./pages/Notifications";
 import AppLayout from "./components/AppLayout";
+import { XPToastProvider } from "./components/XPToastProvider";
 
 function Router() {
   return (
@@ -80,6 +82,9 @@ function Router() {
       <Route path="/appearance">
         <AppLayout><Appearance /></AppLayout>
       </Route>
+      <Route path="/notifications">
+        <AppLayout><Notifications /></AppLayout>
+      </Route>
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -91,10 +96,12 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable>
         <VyroThemeProvider>
-          <TooltipProvider>
-            <Toaster position="top-center" richColors />
-            <Router />
-          </TooltipProvider>
+          <XPToastProvider>
+            <TooltipProvider>
+              <Toaster position="top-center" richColors />
+              <Router />
+            </TooltipProvider>
+          </XPToastProvider>
         </VyroThemeProvider>
       </ThemeProvider>
     </ErrorBoundary>

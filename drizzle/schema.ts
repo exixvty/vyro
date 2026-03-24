@@ -460,3 +460,40 @@ export const themePreferences = mysqlTable("theme_preferences", {
 
 export type ThemePreference = typeof themePreferences.$inferSelect;
 export type InsertThemePreference = typeof themePreferences.$inferInsert;
+
+// ─── Push Subscriptions ───────────────────────────────────────────────────────
+export const pushSubscriptions = mysqlTable("push_subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  userAgent: text("userAgent"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
+
+// ─── Notification Settings ────────────────────────────────────────────────────
+export const notificationSettings = mysqlTable("notification_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  // Daily reminders
+  workoutReminder: boolean("workoutReminder").default(true).notNull(),
+  workoutReminderTime: varchar("workoutReminderTime", { length: 5 }).default("09:00").notNull(), // HH:MM
+  habitReminder: boolean("habitReminder").default(true).notNull(),
+  habitReminderTime: varchar("habitReminderTime", { length: 5 }).default("20:00").notNull(), // HH:MM
+  streakAlert: boolean("streakAlert").default(true).notNull(),
+  // Achievement notifications
+  levelUpAlert: boolean("levelUpAlert").default(true).notNull(),
+  achievementAlert: boolean("achievementAlert").default(true).notNull(),
+  // Weekly summary
+  weeklySummary: boolean("weeklySummary").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type NotificationSetting = typeof notificationSettings.$inferSelect;
+export type InsertNotificationSetting = typeof notificationSettings.$inferInsert;

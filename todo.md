@@ -272,3 +272,19 @@
 - [x] Polish layout with clean spacing and visual hierarchy
 - [x] Make dashboard mobile-friendly and easy to scan
 - [x] Test all dashboard elements and interactions
+
+## Phase 33: Addictive Engagement & Push Notifications
+- [x] XP gain floating animation (+50 XP 🔥) on every XP-earning action
+- [x] Level-up full-screen celebration with motivational messages ("You're becoming Elite 🔥")
+- [x] Motivational message variants by tier (Rookie → Prospect → Athlete → Beast → Elite → Legend)
+- [x] Streak milestone celebrations (3, 7, 14, 30 days)
+- [x] Web Push notification service worker handler (sw.js updated)
+- [x] Push subscription management (subscribe/unsubscribe)
+- [x] Server-side push notification sending with VAPID keys (web-push)
+- [x] Daily workout reminder notification (9am)
+- [x] Habit check-in reminder notification (8pm)
+- [x] Streak danger notification (if no activity by 9pm)
+- [x] Notification permission prompt in app (PermissionBanner component)
+- [x] Notification settings page (enable/disable each type)
+- [x] Notifications route added to AppLayout More drawer
+- [x] All 14 tests passing, zero TypeScript errors
