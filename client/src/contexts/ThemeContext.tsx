@@ -11,6 +11,7 @@ export interface ThemeCustomization {
   appName: string;
   logoUrl?: string;
   presetTheme: "custom" | "neon" | "sunset" | "ocean" | "forest" | "cyberpunk";
+  beastModeActive?: boolean;
 }
 
 export const PRESET_THEMES: Record<string, Partial<ThemeCustomization>> = {

@@ -2,8 +2,10 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Settings, Trophy, Dumbbell, Flame, TrendingUp, Star, ChevronRight, LogOut, Crown } from "lucide-react";
+import { Settings, Trophy, Dumbbell, Flame, TrendingUp, Star, ChevronRight, LogOut, Crown, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const GOAL_LABELS: Record<string, string> = {
   fat_loss: "Fat Loss", lean_bulk: "Lean Bulk", muscle_gain: "Muscle Gain",
@@ -26,6 +28,8 @@ export default function Profile() {
   const { data: profile } = trpc.profile.get.useQuery();
   const { data: stats } = trpc.gamification.getStats.useQuery();
   const { data: achievements } = trpc.gamification.getAchievements.useQuery();
+  const [uploading, setUploading] = useState(false);
+  const updateProfilePicture = trpc.profile.upsert.useMutation();
 
   const level = stats?.level ?? 1;
   const xp = stats?.xp ?? 0;
@@ -35,6 +39,37 @@ export default function Profile() {
   const progress = Math.min(100, ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100);
 
   const initials = user?.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "?";
+
+  const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      // Upload to S3 via manus-upload-file
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) throw new Error("Upload failed");
+      const { url } = await response.json();
+      
+      // Update local profile with new avatar
+      await updateProfilePicture.mutateAsync({});
+      // Invalidate profile query to refetch
+      trpc.useUtils().profile.get.invalidate();
+      toast.success("Profile picture updated!");
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error("Failed to upload profile picture");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,9 +86,31 @@ export default function Profile() {
         <div className="bg-card border border-border rounded-2xl p-5 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-primary/10 blur-3xl" />
           <div className="relative flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
-              <span className="text-2xl font-display font-bold text-primary">{initials}</span>
+            {/* Profile picture with upload */}
+            <div className="relative group">
+              {profile?.avatarUrl ? (
+                <img
+                  src={profile.avatarUrl}
+                  alt="Profile"
+                  className="w-16 h-16 rounded-2xl object-cover"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
+                  <span className="text-2xl font-display font-bold text-primary">{initials}</span>
+                </div>
+              )}
+              <label className="absolute inset-0 rounded-2xl bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <Upload size={20} className="text-white" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleProfilePictureUpload}
+                  disabled={uploading}
+                />
+              </label>
             </div>
+            
             <div className="flex-1">
               <h2 className="text-xl font-display font-bold text-foreground">{user?.name || "Athlete"}</h2>
               <p className="text-sm text-muted-foreground">{user?.email}</p>

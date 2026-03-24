@@ -21,6 +21,19 @@ export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
 
+  // SEO: Set page title and meta description
+  useEffect(() => {
+    document.title = "VYRO — All-in-One Fitness App";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Stop using 5 fitness apps. Track workouts, nutrition, habits, and progress in one place with VYRO. AI-powered fitness tracking with gamification.');
+    }
+    const metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (metaKeywords) {
+      metaKeywords.setAttribute('content', 'fitness app, workout tracker, nutrition tracking, habit builder, gamification, exercise routine, strength training, fitness goals');
+    }
+  }, []);
+
   const { data: profile } = trpc.profile.get.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -83,12 +96,15 @@ export default function Home() {
               <Star size={12} fill="currentColor" />
               All-in-one fitness platform
             </div>
-            <h1 className="text-5xl font-display font-bold leading-tight mb-4">
-              Your Ultimate
+            <h1 className="text-6xl font-display font-bold leading-tight mb-4">
+              Stop using 5 fitness apps.
               <br />
-              <span className="gradient-text">Fitness Coach</span>
+              <span className="gradient-text">Use VYRO.</span>
             </h1>
-            <p className="text-muted-foreground text-lg leading-relaxed mb-10">
+            <h2 className="text-lg text-muted-foreground leading-relaxed mb-10">
+              Track workouts, nutrition, and progress in one place.
+            </h2>
+            <p className="text-muted-foreground text-base leading-relaxed mb-10">
               Replace Strava, MyFitnessPal & Nike Training Club with one elegant app. AI-powered, beautifully designed.
             </p>
           </div>
@@ -114,10 +130,10 @@ export default function Home() {
             <a href={getLoginUrl()} className="block">
               <Button
                 size="lg"
-                className="w-full h-14 text-base font-semibold rounded-2xl glow-primary transition-all duration-300 hover:scale-[1.02]"
+                className="w-full h-16 text-lg font-semibold rounded-2xl glow-primary transition-all duration-300 hover:scale-[1.02] shadow-lg"
               >
-                Start Your Journey
-                <ChevronRight size={18} className="ml-1" />
+                Start Workout
+                <ChevronRight size={20} className="ml-2" />
               </Button>
             </a>
             <p className="text-center text-xs text-muted-foreground">

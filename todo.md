@@ -231,3 +231,20 @@
 - [x] Add keywords meta tag
 - [x] Add H2 heading to page content
 - [x] Test SEO improvements
+
+
+## Phase 29: Premium Redesign & Beast Mode
+- [x] Fix SEO on home page (title 30-60 chars, description 50-160 chars, H2 heading, keywords)
+- [x] Add profile picture upload to database and S3
+- [x] Display profile picture next to "VYRO" header in AppLayout
+- [x] Rebuild Home landing page with bold headline "Stop using 5 fitness apps. Use VYRO."
+- [x] Add subtext "Track workouts, nutrition, and progress in one place."
+- [x] Add large centered "Start Workout" CTA button
+- [x] Implement Beast Mode toggle in Appearance settings
+- [x] Wire Beast Mode to multiply XP rewards (1.5x or 2x)
+- [x] Add Beast Mode UI glow effect (subtle neon glow around active elements)
+- [x] Polish UI: black background, white text, blue accents
+- [x] Improve spacing, font consistency, button sizes
+- [x] Add subtle shadows and glow to important buttons
+- [x] Ensure smooth transitions between pages
+- [x] Test all Appearance settings (colors, fonts, Beast Mode, profile pic)

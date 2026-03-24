@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useTheme, PRESET_THEMES, COLOR_MAP, FONT_MAP } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
-import { Palette, Type, Zap, Upload, Save, Loader2 } from "lucide-react";
+import { Palette, Type, Zap, Upload, Save, Loader2, Flame } from "lucide-react";
 import { toast } from "sonner";
 
 const COLORS = Object.keys(COLOR_MAP);
@@ -206,6 +206,33 @@ export default function Appearance() {
           className="w-full px-4 py-2 rounded-lg bg-card border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           placeholder="VYRO"
         />
+      </div>
+
+      {/* Beast Mode Toggle */}
+      <div className="px-5 mb-6">
+        <div className="bg-card border border-border rounded-2xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Flame size={20} className="text-orange-400" />
+              <div>
+                <p className="font-semibold text-foreground">Beast Mode</p>
+                <p className="text-xs text-muted-foreground">2x XP rewards, harder workouts</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setLocal({ ...local, beastModeActive: !local.beastModeActive })}
+              className={`w-12 h-6 rounded-full transition-colors ${
+                local.beastModeActive ? 'bg-orange-500' : 'bg-muted'
+              }`}
+            >
+              <div
+                className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                  local.beastModeActive ? 'translate-x-6' : 'translate-x-0.5'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Save Button */}
