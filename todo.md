@@ -201,3 +201,25 @@
 - [x] Apply font-family CSS variable to document body
 - [x] Wire app name into AppLayout nav header from ThemeContext
 - [x] Ensure Appearance page save triggers immediate DOM update
+
+## Phase 26: Polish for Publishing
+- [ ] Fix nested button error in Nutrition.tsx (button inside button at line 214/223)
+- [ ] Soften the AppLayout header border and make it more subtle
+- [ ] Polish Home landing page for unauthenticated visitors
+- [ ] Ensure consistent spacing and padding across all pages
+- [ ] Add proper empty states with illustrations for all list pages
+- [ ] Verify all loading states show skeletons not blank screens
+- [ ] Clean up any console warnings/errors
+- [ ] Verify Appearance page works end-to-end
+- [ ] Final visual consistency pass across all pages
+
+
+## Phase 27: PWA Setup (Progressive Web App)
+- [x] Generate PWA icons (192x192 and 512x512 PNG)
+- [x] Create manifest.json with app metadata
+- [x] Build service worker with offline caching
+- [x] Wire manifest link into index.html
+- [x] Register service worker in main.tsx
+- [x] Create InstallPrompt component for mobile users
+- [x] Wire InstallPrompt into AppLayout
+- [x] Test PWA installation on mobile

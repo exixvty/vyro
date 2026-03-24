@@ -8,6 +8,23 @@ import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
 
+// Register service worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('[PWA] Service worker registered:', registration);
+        // Check for updates periodically
+        setInterval(() => {
+          registration.update();
+        }, 60000); // Check every minute
+      })
+      .catch((error) => {
+        console.error('[PWA] Service worker registration failed:', error);
+      });
+  });
+}
+
 const queryClient = new QueryClient();
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {

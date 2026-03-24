@@ -1,0 +1,102 @@
+{
+  "name": "VYRO — All-in-One Fitness App",
+  "short_name": "VYRO",
+  "description": "Your ultimate fitness coach. AI-powered workouts, nutrition tracking, habit building, and gamification all in one app.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["fitness", "health", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-512-AiLRTCDdqKa8yYX8t3oJnx.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "form_factor": "wide"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-5TefzRNuutfjqrMwecVatk.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "form_factor": "narrow"
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-5TefzRNuutfjqrMwecVatk.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-AG4JQNLUTWgktcDLoCtN64.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-512-AiLRTCDdqKa8yYX8t3oJnx.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-512-aKfTUF23eKPEugESM2rTUQ.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-5TefzRNuutfjqrMwecVatk.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-512-AiLRTCDdqKa8yYX8t3oJnx.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Workout",
+      "short_name": "Workout",
+      "description": "Begin a new workout session",
+      "url": "/workout",
+      "icons": [
+        {
+          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-5TefzRNuutfjqrMwecVatk.webp",
+          "sizes": "192x192",
+          "type": "image/webp"
+        }
+      ]
+    },
+    {
+      "name": "Log Nutrition",
+      "short_name": "Nutrition",
+      "description": "Track your meals and nutrition",
+      "url": "/nutrition",
+      "icons": [
+        {
+          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-5TefzRNuutfjqrMwecVatk.webp",
+          "sizes": "192x192",
+          "type": "image/webp"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

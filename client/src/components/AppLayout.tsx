@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
+import InstallPrompt from "@/components/InstallPrompt";
 import {
   LayoutDashboard,
   Dumbbell,
@@ -137,7 +138,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-container flex flex-col bg-background">
       {/* App header with customized name and logo */}
-      <div className="sticky top-0 z-40 px-5 pt-4 pb-2 bg-gradient-to-b from-background to-background/80 backdrop-blur-sm border-b border-border/40">
+      <div className="sticky top-0 z-40 px-5 pt-3 pb-2 bg-background/90 backdrop-blur-xl border-b border-border/20">
         <div className="flex items-center gap-3">
           {customization.logoUrl ? (
             <img src={customization.logoUrl} alt="logo" className="w-8 h-8 rounded-lg" />
@@ -159,6 +160,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </PageTransition>
       </main>
+
+      {/* Install Prompt */}
+      <InstallPrompt />
 
       {/* More drawer */}
       {showMore && (

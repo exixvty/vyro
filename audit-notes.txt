@@ -1,0 +1,11 @@
+Visual Audit Notes:
+1. Dashboard looks good overall - stat cards, greeting, CTA all clean
+2. "VYRO" header at top with V icon - looks clean but the border line below is a bit harsh
+3. The "Start Workout" CTA gradient (pink/magenta) clashes slightly with the violet theme
+4. Bottom nav bar looks polished with glass effect
+5. Need to check: Home landing page for unauthenticated users
+6. Need to check: All other pages for consistency
+7. The header should be more subtle - maybe remove the border or make it softer
+8. Need to check browser console for any runtime errors
+9. Need to check all pages render properly
+10. Need to verify the Appearance page works end-to-end

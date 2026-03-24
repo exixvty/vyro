@@ -211,9 +211,12 @@ export default function Nutrition() {
 
           return (
             <div key={meal} className="bg-card border border-border rounded-2xl overflow-hidden">
-              <button
+              <div
                 onClick={() => setExpandedMeal(isExpanded ? null : meal)}
-                className="w-full flex items-center gap-3 p-4"
+                className="w-full flex items-center gap-3 p-4 cursor-pointer"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpandedMeal(isExpanded ? null : meal); }}
               >
                 <span className="text-xl">{MEAL_ICONS[meal]}</span>
                 <div className="flex-1 text-left">
@@ -227,7 +230,7 @@ export default function Nutrition() {
                   <Plus size={14} className="text-primary" />
                 </button>
                 {isExpanded ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
-              </button>
+              </div>
 
               {isExpanded && (
                 <div className="px-4 pb-4 space-y-2">
