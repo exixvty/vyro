@@ -144,6 +144,13 @@ export function ThemeProvider({
 
     // Store button style for component usage
     root.style.setProperty("--button-style", custom.buttonStyle);
+
+    // Beast Mode: apply body glow class
+    if (custom.beastModeActive) {
+      body.classList.add("beast-mode");
+    } else {
+      body.classList.remove("beast-mode");
+    }
   };
 
   useEffect(() => {

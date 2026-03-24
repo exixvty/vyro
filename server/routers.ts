@@ -286,9 +286,9 @@ const nutritionRouter = router({
       const db = await getDb();
       if (!db) throw new Error("DB unavailable");
       await db.insert(nutritionLogs).values({ userId: ctx.user.id, ...input });
-      return { success: true };
+      const xpResult = await awardXPWithLevelUp(db, ctx.user.id, 20, "Logged food");
+      return { success: true, ...xpResult };
     }),
-
   getDayLogs: protectedProcedure
     .input(z.object({ date: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -505,7 +505,7 @@ const habitsRouter = router({
         )
         .limit(1);
 
-      if (existing.length > 0) return { success: true, alreadyDone: true };
+      if (existing.length > 0) return { success: true, alreadyDone: true, leveledUp: false, xpEarned: 0, oldLevel: 1, newLevel: 1, tierChanged: false, oldTier: "Rookie", newTier: "Rookie" };
 
       await db.insert(habitCompletions).values({
         habitId: input.habitId,
@@ -519,8 +519,8 @@ const habitsRouter = router({
         .set({ currentStreak: sql`currentStreak + 1` })
         .where(eq(habits.id, input.habitId));
 
-      await awardXP(db, ctx.user.id, 10, "Completed habit");
-      return { success: true };
+      const xpResult = await awardXPWithLevelUp(db, ctx.user.id, 30, "Completed habit");
+      return { success: true, ...xpResult };
     }),
 
   getCompletions: protectedProcedure
@@ -682,6 +682,47 @@ async function awardXP(db: any, userId: number, xp: number, _reason: string) {
         level: sql`GREATEST(1, FLOOR(1 + SQRT(xp / 100)))`,
       },
     });
+}
+
+const TIER_THRESHOLDS = [
+  { tier: "Rookie", minLevel: 1 },
+  { tier: "Athlete", minLevel: 5 },
+  { tier: "Warrior", minLevel: 10 },
+  { tier: "Champion", minLevel: 20 },
+  { tier: "Elite", minLevel: 35 },
+  { tier: "Legend", minLevel: 50 },
+];
+function getTierForLevel(level: number): string {
+  let tier = "Rookie";
+  for (const t of TIER_THRESHOLDS) {
+    if (level >= t.minLevel) tier = t.tier;
+    else break;
+  }
+  return tier;
+}
+
+async function awardXPWithLevelUp(db: any, userId: number, xp: number, reason: string) {
+  // Get current stats before update
+  const before = await db.select().from(userGameStats).where(eq(userGameStats.userId, userId)).limit(1);
+  const oldLevel = before[0]?.level ?? 1;
+  const oldTier = getTierForLevel(oldLevel);
+
+  await awardXP(db, userId, xp, reason);
+
+  // Get updated stats
+  const after = await db.select().from(userGameStats).where(eq(userGameStats.userId, userId)).limit(1);
+  const newLevel = after[0]?.level ?? 1;
+  const newTier = getTierForLevel(newLevel);
+
+  return {
+    xpEarned: xp,
+    leveledUp: newLevel > oldLevel,
+    oldLevel,
+    newLevel,
+    tierChanged: newTier !== oldTier,
+    oldTier,
+    newTier,
+  };
 }
 
 // ─── App Router ───────────────────────────────────────────────────────────────

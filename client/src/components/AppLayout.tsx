@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
 import InstallPrompt from "@/components/InstallPrompt";
+import LevelUpModal from "@/components/LevelUpModal";
+import { useLevelUp } from "@/hooks/useLevelUp";
 import {
   LayoutDashboard,
   Dumbbell,
@@ -115,6 +117,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [showMore, setShowMore] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const { customization } = useTheme();
+  const { levelUpData, subscribe, dismiss } = useLevelUp();
+
+  // Subscribe to global level-up events
+  useEffect(() => {
+    const unsub = subscribe();
+    return () => { unsub(); };
+  }, [subscribe]);
 
   const isMoreActive = MORE_ITEMS.some(
     (item) => location === item.path || location.startsWith(item.path + "/")
@@ -163,6 +172,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Install Prompt */}
       <InstallPrompt />
+
+      {/* Level-Up Celebration Modal */}
+      <LevelUpModal data={levelUpData} onClose={dismiss} />
 
       {/* More drawer */}
       {showMore && (

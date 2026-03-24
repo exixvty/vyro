@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { useLocation } from "wouter";
 import { CheckmarkButton, ConfettiEffect, XPGainToast } from "@/components/Interactive";
+import { checkAndEmitLevelUp } from "@/hooks/useLevelUp";
 
 /* ─── Types ───────────────────────────────────────────────────────────── */
 interface ExerciseFromDB {
@@ -502,6 +503,7 @@ function ActiveSession({
       setXpGain({ visible: true, amount: data.xpEarned });
       setTimeout(() => setXpGain({ visible: false, amount: 0 }), 1200);
       toast.success(`Workout complete! +${data.xpEarned} XP 🎉`);
+      checkAndEmitLevelUp(data);
       setTimeout(() => onFinish(), 1500);
     },
     onError: () => toast.error("Failed to save workout"),

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { XPGainToast } from "@/components/Interactive";
+import { checkAndEmitLevelUp } from "@/hooks/useLevelUp";
 
 type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
@@ -50,13 +51,14 @@ export default function Nutrition() {
   const { data: profile } = trpc.profile.get.useQuery();
 
   const logFood = trpc.nutrition.logFood.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.nutrition.getDayLogs.invalidate();
       setShowAddForm(false);
       setForm({ foodName: "", calories: "", proteinG: "", carbsG: "", fatG: "", servingSize: "" });
       setXpGain({ visible: true, amount: 20 });
       setTimeout(() => setXpGain({ visible: false, amount: 0 }), 1000);
       toast.success("Food logged! +20 XP 🍎");
+      checkAndEmitLevelUp(data);
     },
   });
 

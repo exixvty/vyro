@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { CheckmarkButton, XPGainToast } from "@/components/Interactive";
+import { checkAndEmitLevelUp } from "@/hooks/useLevelUp";
 
 const HABIT_ICONS = ["💪", "🏃", "🥗", "💧", "😴", "🧘", "📚", "🚴", "🏊", "⚽", "🎯", "🔥"];
 const HABIT_COLORS = ["violet", "blue", "green", "orange", "red", "pink"];
@@ -28,12 +29,13 @@ export default function Habits() {
   const { data: completions } = trpc.habits.getCompletions.useQuery({ date: today });
 
   const completeHabit = trpc.habits.complete.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.habits.getCompletions.invalidate();
       utils.habits.list.invalidate();
       setXpGain({ visible: true, amount: 30 });
       setTimeout(() => setXpGain({ visible: false, amount: 0 }), 1000);
       toast.success("Habit done! +30 XP 🔥");
+      checkAndEmitLevelUp(data);
     },
     onError: () => toast.error("Failed to update habit"),
   });

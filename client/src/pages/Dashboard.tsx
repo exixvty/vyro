@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import TierBadge from "@/components/TierBadge";
 import { AnimatedCounter, PressCard, ConfettiEffect } from "@/components/Interactive";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const MOTIVATION: Record<string, string[]> = {
   fat_loss:            ["Burn it. Every rep is a step closer 🔥", "Stay in your deficit. You're doing great.", "Sweat is just fat crying 💧"],
@@ -80,6 +81,7 @@ function StreakBadge({ streak }: { streak: number }) {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { customization } = useTheme();
   const [, navigate] = useLocation();
   const [today] = useMemo(() => [format(new Date(), "yyyy-MM-dd")], []);
   const [ctaConfetti, setCtaConfetti] = useState(false);
@@ -177,6 +179,16 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* ── Beast Mode Badge ─────────────────────────────────────────────── */}
+      {customization.beastModeActive && (
+        <div className="px-5 mb-4">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-orange-500/30 bg-orange-500/10 beast-reveal">
+            <span className="text-base fire-icon">🔥</span>
+            <span className="text-xs font-bold text-orange-400 tracking-wide">BEAST MODE ACTIVE — 2× XP</span>
+          </div>
+        </div>
+      )}
+
       {/* ── Stat Pills ──────────────────────────────────────────────────────── */}
       <div className="px-5 mb-6 stagger-children">
         <div className="grid grid-cols-3 gap-3">
@@ -185,7 +197,7 @@ export default function Dashboard() {
               icon: <Dumbbell size={16} />,
               value: gameStats?.totalWorkouts ?? 0,
               label: "Workouts",
-              grad: ["oklch(0.67 0.24 290)", "oklch(0.72 0.22 340)"] as [string,string],
+              grad: ["oklch(0.60 0.22 240)", "oklch(0.65 0.2 210)"] as [string,string],
               isNum: true,
             },
             {
@@ -199,7 +211,7 @@ export default function Dashboard() {
               icon: <Zap size={16} />,
               value: level,
               label: "Current Level",
-              grad: ["oklch(0.80 0.2 85)", "oklch(0.75 0.2 55)"] as [string,string],
+              grad: ["oklch(0.60 0.22 240)", "oklch(0.65 0.2 210)"] as [string,string],
               isNum: true,
             },
           ].map(({ icon, value, label, grad, isNum }, i) => (
@@ -244,7 +256,7 @@ export default function Dashboard() {
             className="w-full relative overflow-hidden rounded-3xl p-5 flex items-center justify-between group ripple press-scale-lg cta-pulse"
             style={{
               background: "var(--grad-primary)",
-              boxShadow: "0 12px 40px var(--vyro-glow), 0 4px 16px oklch(0 0 0 / 0.3)",
+              boxShadow: "0 12px 40px oklch(0.60 0.22 240 / 0.45), 0 4px 16px oklch(0 0 0 / 0.3)",
             }}
           >
             {/* Noise overlay */}
