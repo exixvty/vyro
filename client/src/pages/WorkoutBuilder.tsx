@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,19 @@ interface WorkoutExercise {
 export default function WorkoutBuilder() {
   const { user } = useAuth();
   const [workoutName, setWorkoutName] = useState("");
+
+  // SEO: Set page title and meta description
+  useEffect(() => {
+    document.title = "Build Custom Workouts | VYRO Fitness";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Create personalized workout routines with VYRO. Choose exercises, set reps, weight, and rest times. Build the perfect workout plan.');
+    }
+    const metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (metaKeywords) {
+      metaKeywords.setAttribute('content', 'workout builder, custom workouts, exercise routine, fitness planning, strength training');
+    }
+  }, []);
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [showExerciseModal, setShowExerciseModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,6 +115,7 @@ export default function WorkoutBuilder() {
       <div className="sticky top-0 z-10 bg-background border-b border-border">
         <div className="container max-w-2xl mx-auto px-4 py-4">
           <h1 className="text-2xl font-bold">Create Workout</h1>
+          <h2 className="text-sm text-muted-foreground mt-1">Build your perfect custom workout routine</h2>
         </div>
       </div>
 

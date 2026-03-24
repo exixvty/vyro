@@ -223,3 +223,11 @@
 - [x] Create InstallPrompt component for mobile users
 - [x] Wire InstallPrompt into AppLayout
 - [x] Test PWA installation on mobile
+
+
+## Phase 28: SEO Fixes for /workout/builder
+- [x] Add proper page title (30-60 characters)
+- [x] Add meta description (50-160 characters)
+- [x] Add keywords meta tag
+- [x] Add H2 heading to page content
+- [x] Test SEO improvements
