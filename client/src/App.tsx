@@ -25,6 +25,7 @@ import Tiers from "./pages/Tiers";
 import Performance from "./pages/Performance";
 import Appearance from "./pages/Appearance";
 import Notifications from "./pages/Notifications";
+import Recovery from "./pages/Recovery";
 import AppLayout from "./components/AppLayout";
 import { XPToastProvider } from "./components/XPToastProvider";
 
@@ -43,6 +44,9 @@ function Router() {
         <AppLayout><WorkoutBuilder /></AppLayout>
       </Route>
       <Route path="/nutrition">
+        <AppLayout><Nutrition /></AppLayout>
+      </Route>
+      <Route path="/fuel">
         <AppLayout><Nutrition /></AppLayout>
       </Route>
       <Route path="/progress">
@@ -84,6 +88,9 @@ function Router() {
       </Route>
       <Route path="/notifications">
         <AppLayout><Notifications /></AppLayout>
+      </Route>
+      <Route path="/recovery">
+        <AppLayout><Recovery /></AppLayout>
       </Route>
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

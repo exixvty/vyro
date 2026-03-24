@@ -497,3 +497,41 @@ export const notificationSettings = mysqlTable("notification_settings", {
 
 export type NotificationSetting = typeof notificationSettings.$inferSelect;
 export type InsertNotificationSetting = typeof notificationSettings.$inferInsert;
+
+// ─── Addiction Recovery ───────────────────────────────────────────────────────
+export const userAddictions = mysqlTable("user_addictions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  addictionType: varchar("addictionType", { length: 100 }).notNull(),
+  addictionLabel: varchar("addictionLabel", { length: 150 }).notNull(),
+  sobrietyStartDate: timestamp("sobrietyStartDate").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type UserAddiction = typeof userAddictions.$inferSelect;
+export type InsertUserAddiction = typeof userAddictions.$inferInsert;
+
+export const urgeLog = mysqlTable("urge_log", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  addictionId: int("addictionId").notNull(),
+  intensity: int("intensity").notNull(),
+  trigger: varchar("trigger", { length: 200 }),
+  copingStrategy: varchar("copingStrategy", { length: 200 }),
+  overcame: boolean("overcame").default(true).notNull(),
+  loggedAt: timestamp("loggedAt").defaultNow().notNull(),
+});
+export type UrgeLog = typeof urgeLog.$inferSelect;
+export type InsertUrgeLog = typeof urgeLog.$inferInsert;
+
+export const recoveryMotivations = mysqlTable("recovery_motivations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  message: text("message").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type RecoveryMotivation = typeof recoveryMotivations.$inferSelect;
+export type InsertRecoveryMotivation = typeof recoveryMotivations.$inferInsert;

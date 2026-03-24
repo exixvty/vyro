@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useTheme, PRESET_THEMES, COLOR_MAP, FONT_MAP } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
-import { Palette, Type, Zap, Upload, Save, Loader2, Flame } from "lucide-react";
+import { Palette, Type, Zap, Upload, Save, Loader2, Flame, Crown, Lock } from "lucide-react";
+import { useLocation } from "wouter";
 import { toast } from "sonner";
 
 const COLORS = Object.keys(COLOR_MAP);
@@ -17,6 +18,10 @@ export default function Appearance() {
 
   const [local, setLocal] = useState(customization);
   const [isSaving, setIsSaving] = useState(false);
+  const [, navigate] = useLocation();
+
+  const { data: premiumData } = trpc.recovery.checkPremium.useQuery();
+  const isPremium = premiumData?.isPremium;
 
   useEffect(() => {
     setLocal(customization);
@@ -141,71 +146,114 @@ export default function Appearance() {
         </div>
       </div>
 
-      {/* Font Selection */}
+      {/* Font Selection — Premium */}
       <div className="px-5 mb-6">
-        <p className="text-xs text-muted-foreground mb-3 font-semibold flex items-center gap-2">
-          <Type size={14} /> FONT FAMILY
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          {FONTS.map((font) => (
-            <button
-              key={font}
-              onClick={() => setLocal({ ...local, fontFamily: font as any })}
-              className={`p-3 rounded-lg border-2 transition-all ${
-                local.fontFamily === font ? "border-primary bg-primary/10" : "border-border bg-card"
-              }`}
-              style={{ fontFamily: FONT_MAP[font] }}
-            >
-              <p className="text-sm font-semibold capitalize">{font.replace("-", " ")}</p>
-              <p className="text-xs text-muted-foreground">Aa</p>
-            </button>
-          ))}
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs text-muted-foreground font-semibold flex items-center gap-2">
+            <Type size={14} /> FONT FAMILY
+          </p>
+          {!isPremium && (
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+              <Crown size={10} className="text-yellow-400" />
+              <span className="text-[10px] font-bold text-yellow-400">Pro</span>
+            </div>
+          )}
         </div>
-      </div>
-
-      {/* Button Style */}
-      <div className="px-5 mb-6">
-        <p className="text-xs text-muted-foreground mb-3 font-semibold flex items-center gap-2">
-          <Zap size={14} /> BUTTON STYLE
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          {BUTTON_STYLES.map((style) => (
-            <button
-              key={style}
-              onClick={() => setLocal({ ...local, buttonStyle: style })}
-              className={`p-3 rounded-lg border-2 transition-all ${
-                local.buttonStyle === style ? "border-primary bg-primary/10" : "border-border bg-card"
-              }`}
-            >
-              <p className="text-sm font-semibold capitalize mb-2">{style}</p>
-              <div
-                className={`px-3 py-1.5 rounded text-xs font-medium text-white ${
-                  style === "solid"
-                    ? "bg-primary"
-                    : style === "outline"
-                      ? "border border-primary text-primary bg-transparent"
-                      : style === "gradient"
-                        ? "bg-gradient-to-r from-primary to-accent"
-                        : "bg-primary/20 backdrop-blur border border-primary/50"
+        {!isPremium ? (
+          <button onClick={() => navigate("/premium")}
+            className="w-full p-4 rounded-xl border border-dashed border-yellow-400/30 bg-yellow-400/5 flex items-center gap-3 text-left hover:bg-yellow-400/10 transition-colors">
+            <Lock size={16} className="text-yellow-400 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Custom Fonts</p>
+              <p className="text-xs text-muted-foreground">Upgrade to Premium to unlock font customization</p>
+            </div>
+            <Crown size={14} className="text-yellow-400 ml-auto shrink-0" />
+          </button>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {FONTS.map((font) => (
+              <button key={font} onClick={() => setLocal({ ...local, fontFamily: font as any })}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  local.fontFamily === font ? "border-primary bg-primary/10" : "border-border bg-card"
                 }`}
-              >
-                Preview
-              </div>
-            </button>
-          ))}
-        </div>
+                style={{ fontFamily: FONT_MAP[font] }}>
+                <p className="text-sm font-semibold capitalize">{font.replace("-", " ")}</p>
+                <p className="text-xs text-muted-foreground">Aa</p>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* App Name */}
+      {/* Button Style — Premium */}
       <div className="px-5 mb-6">
-        <label className="text-sm font-medium text-foreground mb-2 block">App Name</label>
-        <input
-          type="text"
-          value={local.appName}
-          onChange={(e) => setLocal({ ...local, appName: e.target.value })}
-          className="w-full px-4 py-2 rounded-lg bg-card border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          placeholder="VYRO"
-        />
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs text-muted-foreground font-semibold flex items-center gap-2">
+            <Zap size={14} /> BUTTON STYLE
+          </p>
+          {!isPremium && (
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+              <Crown size={10} className="text-yellow-400" />
+              <span className="text-[10px] font-bold text-yellow-400">Pro</span>
+            </div>
+          )}
+        </div>
+        {!isPremium ? (
+          <button onClick={() => navigate("/premium")}
+            className="w-full p-4 rounded-xl border border-dashed border-yellow-400/30 bg-yellow-400/5 flex items-center gap-3 text-left hover:bg-yellow-400/10 transition-colors">
+            <Lock size={16} className="text-yellow-400 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Outline & Border Styles</p>
+              <p className="text-xs text-muted-foreground">Upgrade to Premium to unlock button style customization</p>
+            </div>
+            <Crown size={14} className="text-yellow-400 ml-auto shrink-0" />
+          </button>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {BUTTON_STYLES.map((style) => (
+              <button key={style} onClick={() => setLocal({ ...local, buttonStyle: style })}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  local.buttonStyle === style ? "border-primary bg-primary/10" : "border-border bg-card"
+                }`}>
+                <p className="text-sm font-semibold capitalize mb-2">{style}</p>
+                <div className={`px-3 py-1.5 rounded text-xs font-medium text-white ${
+                  style === "solid" ? "bg-primary"
+                    : style === "outline" ? "border border-primary text-primary bg-transparent"
+                    : style === "gradient" ? "bg-gradient-to-r from-primary to-accent"
+                    : "bg-primary/20 backdrop-blur border border-primary/50"
+                }`}>Preview</div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* App Name — Premium */}
+      <div className="px-5 mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-medium text-foreground">App Name & Logo</label>
+          {!isPremium && (
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+              <Crown size={10} className="text-yellow-400" />
+              <span className="text-[10px] font-bold text-yellow-400">Pro</span>
+            </div>
+          )}
+        </div>
+        {!isPremium ? (
+          <button onClick={() => navigate("/premium")}
+            className="w-full p-4 rounded-xl border border-dashed border-yellow-400/30 bg-yellow-400/5 flex items-center gap-3 text-left hover:bg-yellow-400/10 transition-colors">
+            <Lock size={16} className="text-yellow-400 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Custom App Name & Logo</p>
+              <p className="text-xs text-muted-foreground">Upgrade to Premium to personalize your app identity</p>
+            </div>
+            <Crown size={14} className="text-yellow-400 ml-auto shrink-0" />
+          </button>
+        ) : (
+          <input type="text" value={local.appName} onChange={(e) => setLocal({ ...local, appName: e.target.value })}
+            className="w-full px-4 py-2 rounded-lg bg-card border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            placeholder="VYRO" />
+        )}
       </div>
 
       {/* Beast Mode Toggle */}

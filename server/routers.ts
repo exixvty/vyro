@@ -11,6 +11,7 @@ import { workoutsRouter } from "./routers/workouts";
 import { engagementRouter } from "./routers/engagement";
 import { themeRouter } from "./routers/theme";
 import { notificationsRouter } from "./routers/notifications";
+import { recoveryRouter } from "./routers/recovery";
 
 import {
   userProfiles,
@@ -750,6 +751,7 @@ export const appRouter = router({
   engagement: engagementRouter,
   theme: themeRouter,
   notifications: notificationsRouter,
+  recovery: recoveryRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -288,3 +288,34 @@
 - [x] Notification settings page (enable/disable each type)
 - [x] Notifications route added to AppLayout More drawer
 - [x] All 14 tests passing, zero TypeScript errors
+
+## Phase 34: Final Polish for Publication
+- [x] Fix nested button error in Nutrition.tsx
+- [x] Soften AppLayout header border
+- [x] Polish Home landing page for unauthenticated visitors (hero, CTA, features)
+- [x] Add proper empty states for workout history, habits, nutrition logs
+- [x] Ensure loading skeletons on all data-dependent pages
+- [x] Clean up any console warnings/errors
+- [x] Visual consistency pass: spacing, typography, colors across all pages
+- [x] Verify Appearance settings work end-to-end
+- [x] Final vitest run (all tests passing)
+- [x] Final TypeScript check (zero errors)
+
+## Phase 35: Addiction Recovery Module + Premium Polish
+- [x] 21-day free trial (update Premium page and server logic — based on account createdAt)
+- [x] Font customization locked to Premium
+- [x] Outline/border style customization locked to Premium
+- [x] App name/logo customization locked to Premium
+- [x] Recovery page added to More drawer (Premium-gated)
+- [x] DB schema: user_addictions, urge_log, recovery_motivations tables
+- [x] tRPC router: recovery (addictions CRUD, urge log, motivation, stats)
+- [x] Full addiction list (29 types: alcohol, drugs, smoking, gambling, porn, social media, gaming, food, shopping, caffeine, self-harm, vaping, sugar, screens, etc.)
+- [x] Sobriety timer (days/hours/minutes/seconds live counter)
+- [x] Milestone celebrations (1 day, 3 days, 1 week, 2 weeks, 1 month, 3 months, 6 months, 1 year, 2 years)
+- [x] Urge log with intensity slider and coping strategies
+- [x] Daily motivational messages (rotating, 15 unique messages)
+- [x] Custom motivation messages (user-written, saved)
+- [x] Ways to combat each addiction (science-backed tips per type)
+- [x] Premium gate on Recovery page
+- [x] Premium gate on Appearance font/outline/app-name features
+- [x] 20 vitest tests passing, zero TypeScript errors

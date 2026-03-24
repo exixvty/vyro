@@ -1,0 +1,6 @@
+Screenshot shows the Dashboard page (not the Home/landing page).
+The user is logged in as "Priyansh" with Rookie Lv.1, 0 XP.
+Dashboard looks clean with: greeting, tier badge, XP bar, stats row, Start Workout CTA, Today section.
+The screenshot is from /dashboard route, not / route.
+The Home.tsx changes (landing page for unauthenticated) would only show when logged out.
+Everything looks visually consistent and clean.

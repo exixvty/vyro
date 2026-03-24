@@ -21,6 +21,7 @@ import {
   Sparkles,
   Palette,
   Bell,
+  Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,7 @@ const MORE_ITEMS = [
   { path: "/social",       icon: Users,       label: "Community",    color: "oklch(0.72 0.18 200)" },
   { path: "/appearance",   icon: Palette,     label: "Appearance",   color: "oklch(0.68 0.26 320)" },
   { path: "/notifications", icon: Bell,        label: "Notifications", color: "oklch(0.72 0.18 200)" },
+  { path: "/recovery",      icon: Heart,       label: "Recovery",      color: "oklch(0.72 0.2 10)" },
 ];
 
 /* ─── NavButton — press-scale with spring return ─────────────────────── */
@@ -149,7 +151,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-container flex flex-col bg-background">
       {/* App header with customized name and logo */}
-      <div className="sticky top-0 z-40 px-5 pt-3 pb-2 bg-background/90 backdrop-blur-xl border-b border-border/20">
+      <div className="sticky top-0 z-40 px-5 pt-3 pb-2 bg-background/90 backdrop-blur-xl border-b border-border/10">
         <div className="flex items-center gap-3">
           {customization.logoUrl ? (
             <img src={customization.logoUrl} alt="logo" className="w-8 h-8 rounded-lg" />

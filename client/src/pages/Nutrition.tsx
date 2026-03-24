@@ -225,12 +225,15 @@ export default function Nutrition() {
                   <p className="font-semibold text-sm capitalize text-foreground">{meal}</p>
                   <p className="text-xs text-muted-foreground">{items.length} items · {Math.round(mealCals)} kcal</p>
                 </div>
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={(e) => { e.stopPropagation(); setSelectedMeal(meal); setShowAddForm(true); }}
-                  className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mr-2"
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); setSelectedMeal(meal); setShowAddForm(true); } }}
+                  className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mr-2 cursor-pointer hover:bg-primary/20 transition-colors"
                 >
                   <Plus size={14} className="text-primary" />
-                </button>
+                </div>
                 {isExpanded ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
               </div>
 
