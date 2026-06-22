@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { userAddictions, urgeLog, recoveryMotivations, userProfiles } from "../../drizzle/schema";
+import { userAddictions, urgeLog, recoveryMotivations, userProfiles, notificationSettings } from "../../drizzle/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
@@ -152,6 +152,87 @@ export const recoveryRouter = router({
         .where(and(eq(recoveryMotivations.id, input.motivationId), eq(recoveryMotivations.userId, ctx.user.id)));
       return { success: true };
     }),
+
+  /* ─── Log craving alert (sends immediate push) ─── */
+  logCravingAlert: protectedProcedure
+    .input(z.object({
+      addictionId: z.number(),
+      message: z.string().max(200).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await requirePremium(ctx.user.id, ctx.user.createdAt);
+      // Log the craving in urge log
+      const [result] = await db.insert(urgeLog).values({
+        userId: ctx.user.id,
+        addictionId: input.addictionId,
+        intensity: 8, // high intensity for craving alert
+        trigger: input.message ?? "User triggered craving alert",
+        copingStrategy: null,
+        overcame: false,
+      });
+      // Send immediate push notification
+      const { sendPushToUser } = await import("./notifications");
+      await sendPushToUser(ctx.user.id, {
+        title: "You've Got This! 💪",
+        body: "A craving hit you, but you're stronger. Log it, breathe, and move forward.",
+        tag: "craving-alert",
+        data: {
+          url: "/recovery",
+          type: "craving_alert",
+        },
+      });
+      return { id: result.insertId, notificationSent: true };
+    }),
+
+  /* ─── Set sobriety reminder time ─── */
+  setSobrietyReminderTime: protectedProcedure
+    .input(z.object({
+      time: z.string().regex(/^\d{2}:\d{2}$/), // HH:MM format
+      enabled: z.boolean().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await requirePremium(ctx.user.id, ctx.user.createdAt);
+      const settings = await db
+        .select()
+        .from(notificationSettings)
+        .where(eq(notificationSettings.userId, ctx.user.id))
+        .limit(1);
+      if (!settings[0]) {
+        // Create default settings if not exists
+        await db.insert(notificationSettings).values({
+          userId: ctx.user.id,
+          sobrietyReminderTime: input.time,
+          sobrietyReminder: input.enabled ?? true,
+        });
+      } else {
+        await db
+          .update(notificationSettings)
+          .set({
+            sobrietyReminderTime: input.time,
+            sobrietyReminder: input.enabled ?? settings[0].sobrietyReminder,
+          })
+          .where(eq(notificationSettings.userId, ctx.user.id));
+      }
+      return { success: true };
+    }),
+
+  /* ─── Get sobriety reminder settings ─── */
+  getSobrietyReminderSettings: protectedProcedure.query(async ({ ctx }) => {
+    const db = await requirePremium(ctx.user.id, ctx.user.createdAt);
+    const settings = await db
+      .select()
+      .from(notificationSettings)
+      .where(eq(notificationSettings.userId, ctx.user.id))
+      .limit(1);
+    if (!settings[0]) {
+      return { sobrietyReminder: true, sobrietyReminderTime: "09:00", cravingAlertEnabled: true };
+    }
+    return {
+      sobrietyReminder: settings[0].sobrietyReminder,
+      sobrietyReminderTime: settings[0].sobrietyReminderTime,
+      cravingAlertEnabled: settings[0].cravingAlertEnabled,
+    };
+  }),
 
   /* ─── Check premium status ─── */
   checkPremium: protectedProcedure.query(async ({ ctx }) => {

@@ -319,3 +319,24 @@
 - [x] Premium gate on Recovery page
 - [x] Premium gate on Appearance font/outline/app-name features
 - [x] 20 vitest tests passing, zero TypeScript errors
+
+## Phase 36: Recovery Push Notifications (Sobriety Reminders + Craving Alerts)
+- [ ] Update Recovery page UI: add time picker for daily sobriety reminder (default 9am)
+- [ ] Add "Send Craving Alert" button on Recovery page
+- [ ] Extend recovery router: setReminderTime procedure
+- [ ] Extend recovery router: logCravingAlert procedure (sends immediate push)
+- [ ] Set up Heartbeat cron job for daily sobriety reminders at user's chosen time
+- [ ] Craving alert sends push with message "You've got this! 💪" + options to log urge or call support
+- [ ] Sobriety reminder sends push with "You're X days sober 🔥" + link to Recovery page
+- [ ] Wire UI to show reminder time and last craving alert timestamp
+- [ ] 20+ vitest tests passing, zero TypeScript errors
+
+## Phase 36: Recovery Push Notifications (Daily Reminders + Craving Alerts)
+- [x] Craving alert button on each addiction tracker (red button with Zap icon)
+- [x] Immediate push notification when craving alert is triggered ("You've Got This! 💪")
+- [x] Sobriety reminder time picker in Recovery settings (HH:MM format)
+- [x] Daily sobriety reminder push notification (9am default, user-configurable)
+- [x] Scheduled Heartbeat cron job for daily reminders (/api/scheduled/sobriety-reminders)
+- [x] Recovery reminder settings stored in DB (sobrietyReminder, sobrietyReminderTime, cravingAlertEnabled)
+- [x] Craving alert logged to urge log with high intensity (intensity: 8)
+- [x] All 20 vitest tests passing, zero TypeScript errors

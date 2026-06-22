@@ -302,6 +302,10 @@ export default function Recovery() {
   // Motivation form
   const [newMotivation, setNewMotivation] = useState("");
 
+  // Reminder settings
+  const [reminderTime, setReminderTime] = useState("09:00");
+  const [showReminderSettings, setShowReminderSettings] = useState(false);
+
   const utils = trpc.useUtils();
 
   const { data: premiumData, isLoading: premiumLoading } = trpc.recovery.checkPremium.useQuery();
@@ -368,6 +372,27 @@ export default function Recovery() {
 
   const deleteMotivation = trpc.recovery.deleteMotivation.useMutation({
     onSuccess: () => utils.recovery.listMotivations.invalidate(),
+  });
+
+  const { data: reminderSettings } = trpc.recovery.getSobrietyReminderSettings.useQuery(
+    undefined,
+    { enabled: !!isPremium }
+  );
+
+  const setSobrietyReminderTime = trpc.recovery.setSobrietyReminderTime.useMutation({
+    onSuccess: () => {
+      utils.recovery.getSobrietyReminderSettings.invalidate();
+      toast.success("Reminder time updated!");
+      setShowReminderSettings(false);
+    },
+  });
+
+  const logCravingAlert = trpc.recovery.logCravingAlert.useMutation({
+    onSuccess: () => {
+      utils.recovery.listAddictions.invalidate();
+      toast.success("Craving alert sent! You've got this 💪");
+    },
+    onError: () => toast.error("Failed to send craving alert"),
   });
 
   const dailyMotivation = getDailyMotivation();
@@ -504,24 +529,32 @@ export default function Recovery() {
                       </div>
                     )}
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <button
+                        onClick={() => logCravingAlert.mutate({ addictionId: addiction.id })}
+                        disabled={logCravingAlert.isPending}
+                        className="flex-1 min-w-[90px] py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-sm font-semibold text-red-400 flex items-center justify-center gap-2 hover:border-red-500/60 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                      >
+                        <Zap size={14} />
+                        Craving
+                      </button>
                       <button
                         onClick={() => { setSelectedAddictionId(addiction.id); setShowUrgeForm(true); }}
-                        className="flex-1 py-2.5 rounded-xl bg-card border border-border text-sm font-semibold text-foreground flex items-center justify-center gap-2 hover:border-primary/40 transition-colors"
+                        className="flex-1 min-w-[90px] py-2.5 rounded-xl bg-card border border-border text-sm font-semibold text-foreground flex items-center justify-center gap-2 hover:border-primary/40 transition-colors"
                       >
                         <AlertTriangle size={14} className="text-orange-400" />
-                        Log Urge
+                        Urge
                       </button>
                       <button
                         onClick={() => setShowResetConfirm(addiction.id)}
-                        className="flex-1 py-2.5 rounded-xl bg-card border border-border text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2 hover:border-destructive/40 hover:text-destructive transition-colors"
+                        className="flex-1 min-w-[90px] py-2.5 rounded-xl bg-card border border-border text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2 hover:border-destructive/40 hover:text-destructive transition-colors"
                       >
                         <RotateCcw size={14} />
                         Reset
                       </button>
                       <button
                         onClick={() => removeAddiction.mutate({ addictionId: addiction.id })}
-                        className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
+                        className="w-10 h-10 shrink-0 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
                       >
                         <Trash2 size={14} />
                       </button>

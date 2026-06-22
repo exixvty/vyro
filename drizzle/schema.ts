@@ -491,6 +491,10 @@ export const notificationSettings = mysqlTable("notification_settings", {
   achievementAlert: boolean("achievementAlert").default(true).notNull(),
   // Weekly summary
   weeklySummary: boolean("weeklySummary").default(true).notNull(),
+  // Recovery reminders
+  sobrietyReminder: boolean("sobrietyReminder").default(true).notNull(),
+  sobrietyReminderTime: varchar("sobrietyReminderTime", { length: 5 }).default("09:00").notNull(), // HH:MM
+  cravingAlertEnabled: boolean("cravingAlertEnabled").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
