@@ -21,6 +21,7 @@ import {
   nutritionGoals,
   progressEntries,
   personalRecords,
+  progressPhotos,
   habits,
   habitCompletions,
   userGameStats,
@@ -452,6 +453,125 @@ const progressRouter = router({
 
       await awardXP(db, ctx.user.id, 100, "Set personal record");
       return { success: true };
+    }),
+
+  /* ─── Photo procedures ─── */
+  uploadPhoto: protectedProcedure
+    .input(
+      z.object({
+        photoBase64: z.string().min(100),
+        angle: z.enum(["front", "side", "back"]),
+        notes: z.string().max(500).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("DB unavailable");
+      const { storagePut } = await import("./storage");
+
+      try {
+        const buffer = Buffer.from(input.photoBase64, "base64");
+        const timestamp = Date.now();
+        const fileKey = `progress-photos/${ctx.user.id}/${input.angle}-${timestamp}.jpg`;
+        const { url } = await storagePut(fileKey, buffer, "image/jpeg");
+
+        const [result] = await db.insert(progressPhotos).values({
+          userId: ctx.user.id,
+          photoUrl: url,
+          angle: input.angle,
+          notes: input.notes || null,
+          date: new Date(),
+        });
+
+        return {
+          id: result.insertId,
+          photoUrl: url,
+          angle: input.angle,
+          date: new Date(),
+        };
+      } catch (err) {
+        console.error("Photo upload error:", err);
+        throw new Error("Failed to upload photo");
+      }
+    }),
+
+  listPhotos: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return [];
+    return db
+      .select()
+      .from(progressPhotos)
+      .where(eq(progressPhotos.userId, ctx.user.id))
+      .orderBy(desc(progressPhotos.date));
+  }),
+
+  getPhotosByAngle: protectedProcedure
+    .input(z.object({ angle: z.enum(["front", "side", "back"]) }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return [];
+      return db
+        .select()
+        .from(progressPhotos)
+        .where(and(eq(progressPhotos.userId, ctx.user.id), eq(progressPhotos.angle, input.angle)))
+        .orderBy(desc(progressPhotos.date));
+    }),
+
+  deletePhoto: protectedProcedure
+    .input(z.object({ photoId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("DB unavailable");
+
+      const photo = await db
+        .select()
+        .from(progressPhotos)
+        .where(eq(progressPhotos.id, input.photoId))
+        .limit(1);
+
+      if (!photo[0] || photo[0].userId !== ctx.user.id) {
+        throw new Error("Not your photo");
+      }
+
+      await db.delete(progressPhotos).where(eq(progressPhotos.id, input.photoId));
+      return { success: true };
+    }),
+
+  getComparisonPair: protectedProcedure
+    .input(z.object({ angle: z.enum(["front", "side", "back"]) }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return null;
+
+      const photos = await db
+        .select()
+        .from(progressPhotos)
+        .where(and(eq(progressPhotos.userId, ctx.user.id), eq(progressPhotos.angle, input.angle)))
+        .orderBy(progressPhotos.date);
+
+      if (photos.length < 2) return null;
+
+      const oldest = photos[0];
+      const newest = photos[photos.length - 1];
+      const daysDiff = Math.floor(
+        (newest.date.getTime() - oldest.date.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      return {
+        before: {
+          id: oldest.id,
+          photoUrl: oldest.photoUrl,
+          date: oldest.date,
+          notes: oldest.notes,
+        },
+        after: {
+          id: newest.id,
+          photoUrl: newest.photoUrl,
+          date: newest.date,
+          notes: newest.notes,
+        },
+        daysDiff,
+      };
     }),
 });
 

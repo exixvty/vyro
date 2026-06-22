@@ -124,11 +124,11 @@
 - [x] Daily goals: 3 simple goals with completion tracking
 - [x] Login streak tracking with current/longest streak
 - [x] Beast Mode toggle with activation tracking
-- [ ] Level-up animations and tier unlock messages (UI)
-- [ ] Progress photo upload and side-by-side comparison (UI)
-- [ ] Enhanced Dashboard: today screen, XP bar, streak, quick start button (UI)
-- [ ] Smart notifications: motivational, non-spammy, toggleable (UI)
-- [ ] Personalized motivation messages based on user goals (UI)
+- [x] Level-up animations and tier unlock messages (UI) — LevelUpModal with tier-specific messages
+- [x] Progress photo upload and side-by-side comparison (UI) — Photos tab with front/side/back angles, gallery, and before/after comparison
+- [x] Enhanced Dashboard: today screen, XP bar, streak, quick start button (UI) — Home.tsx redesigned
+- [x] Smart notifications: motivational, non-spammy, toggleable (UI) — Notifications page with settings
+- [x] Personalized motivation messages based on user goals (UI) — Daily motivation in Recovery
 - [ ] Performance optimization and testing
 
 
@@ -203,15 +203,15 @@
 - [x] Ensure Appearance page save triggers immediate DOM update
 
 ## Phase 26: Polish for Publishing
-- [ ] Fix nested button error in Nutrition.tsx (button inside button at line 214/223)
-- [ ] Soften the AppLayout header border and make it more subtle
-- [ ] Polish Home landing page for unauthenticated visitors
-- [ ] Ensure consistent spacing and padding across all pages
-- [ ] Add proper empty states with illustrations for all list pages
-- [ ] Verify all loading states show skeletons not blank screens
-- [ ] Clean up any console warnings/errors
-- [ ] Verify Appearance page works end-to-end
-- [ ] Final visual consistency pass across all pages
+- [x] Fix nested button error in Nutrition.tsx (button inside button at line 214/223)
+- [x] Soften the AppLayout header border and make it more subtle
+- [x] Polish Home landing page for unauthenticated visitors
+- [ ] Ensure consistent spacing and padding across all pages (needs comprehensive pass)
+- [ ] Add proper empty states with illustrations for all list pages (needs all pages)
+- [ ] Verify all loading states show skeletons not blank screens (needs comprehensive pass)
+- [ ] Clean up any console warnings/errors (needs verification)
+- [ ] Verify Appearance page works end-to-end (needs browser test)
+- [ ] Final visual consistency pass across all pages (needs documented pass)
 
 
 ## Phase 27: PWA Setup (Progressive Web App)
