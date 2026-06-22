@@ -129,7 +129,7 @@
 - [x] Enhanced Dashboard: today screen, XP bar, streak, quick start button (UI) — Home.tsx redesigned
 - [x] Smart notifications: motivational, non-spammy, toggleable (UI) — Notifications page with settings
 - [x] Personalized motivation messages based on user goals (UI) — Daily motivation in Recovery
-- [ ] Performance optimization and testing
+- [ ] Performance optimization and testing (needs profiling and optimization pass)
 
 
 ## Phase 17: Visible Tier Ranking System (Liftoff-Inspired)
