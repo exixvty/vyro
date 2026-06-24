@@ -340,3 +340,12 @@
 - [x] Recovery reminder settings stored in DB (sobrietyReminder, sobrietyReminderTime, cravingAlertEnabled)
 - [x] Craving alert logged to urge log with high intensity (intensity: 8)
 - [x] All 20 vitest tests passing, zero TypeScript errors
+
+## Phase 37: Gamification Dashboard Integration
+- [x] Create GamificationDashboard component with all dashboard sections
+- [x] Add tab navigation to Profile page (Fitness Profile vs Gamification tabs)
+- [x] Implement dashboard sub-components (Header, Quick Stats, Challenges, Achievements)
+- [x] Wire dashboard to real data using trpc.gamification hooks
+- [x] Style and animate dashboard with Tailwind and Framer Motion
+- [ ] Test all interactions and verify responsive design
+- [ ] 20+ vitest tests passing, zero TypeScript errors

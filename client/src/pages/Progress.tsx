@@ -178,6 +178,14 @@ function PhotoGallery({
     },
   });
 
+  if (!photos) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">

@@ -6,6 +6,7 @@ import { Settings, Trophy, Dumbbell, Flame, TrendingUp, Star, ChevronRight, LogO
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { toast } from "sonner";
+import GamificationDashboard from "@/components/GamificationDashboard";
 
 const GOAL_LABELS: Record<string, string> = {
   fat_loss: "Fat Loss", lean_bulk: "Lean Bulk", muscle_gain: "Muscle Gain",
@@ -22,9 +23,12 @@ function getLevelTitle(level: number) {
   return LEVEL_TITLES[level] || `Level ${level}`;
 }
 
+type ProfileTab = "fitness" | "gamification";
+
 export default function Profile() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
+  const [activeTab, setActiveTab] = useState<ProfileTab>("fitness");
   const { data: profile } = trpc.profile.get.useQuery();
   const { data: stats } = trpc.gamification.getStats.useQuery();
   const { data: achievements } = trpc.gamification.getAchievements.useQuery();
@@ -135,61 +139,91 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Tabs */}
       <div className="px-5 mb-5">
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { label: "Workouts", value: stats?.totalWorkouts ?? 0, icon: Dumbbell, color: "text-purple-400" },
-            { label: "Streak", value: stats?.workoutStreak ?? 0, icon: Flame, color: "text-orange-400" },
-            { label: "Minutes", value: stats?.totalMinutes ?? 0, icon: TrendingUp, color: "text-blue-400" },
-            { label: "Badges", value: achievements?.length ?? 0, icon: Trophy, color: "text-yellow-400" },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className="bg-card border border-border rounded-xl p-3 text-center">
-              <Icon size={16} className={cn("mx-auto mb-1", color)} />
-              <p className="text-base font-display font-bold text-foreground">{value}</p>
-              <p className="text-[10px] text-muted-foreground">{label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Profile details */}
-      <div className="px-5 mb-5">
-        <h3 className="font-semibold text-sm mb-3">Fitness Profile</h3>
-        <div className="bg-card border border-border rounded-2xl divide-y divide-border">
-          {[
-            { label: "Goal", value: GOAL_LABELS[profile?.primaryGoal || ""] || "Not set" },
-            { label: "Level", value: profile?.fitnessLevel ? profile.fitnessLevel.charAt(0).toUpperCase() + profile.fitnessLevel.slice(1) : "Not set" },
-            { label: "Sport", value: profile?.athleteType ? profile.athleteType.replace(/_/g, " ") : "Not set" },
-            { label: "Weight", value: profile?.weightKg ? `${profile.weightKg} kg` : "Not set" },
-            { label: "Height", value: profile?.heightCm ? `${profile.heightCm} cm` : "Not set" },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex items-center justify-between px-4 py-3">
-              <span className="text-sm text-muted-foreground">{label}</span>
-              <span className="text-sm font-medium text-foreground capitalize">{value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent badges */}
-      {achievements && achievements.length > 0 && (
-        <div className="px-5 mb-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-sm">Recent Badges</h3>
-            <button onClick={() => navigate("/gamification")} className="text-primary text-xs font-medium">
-              See all
+        <div className="flex gap-1 p-1 bg-muted rounded-xl">
+          {(["fitness", "gamification"] as ProfileTab[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={cn(
+                "flex-1 py-2 px-3 rounded-lg text-xs font-medium capitalize transition-all",
+                activeTab === tab ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              )}
+            >
+              {tab === "gamification" ? "Gamification" : "Fitness Profile"}
             </button>
-          </div>
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-            {achievements.slice(0, 8).map((badge) => (
-              <div key={badge.id} className="shrink-0 flex flex-col items-center gap-1.5 p-3 bg-card border border-border rounded-2xl min-w-[70px]">
-                <span className="text-2xl">{badge.badgeIcon}</span>
-                <p className="text-[10px] text-muted-foreground text-center">{badge.badgeName}</p>
-              </div>
-            ))}
-          </div>
+          ))}
         </div>
+      </div>
+
+      {/* Gamification Tab */}
+      {activeTab === "gamification" && (
+        <div className="px-5 mb-5">
+          <GamificationDashboard />
+        </div>
+      )}
+
+      {/* Fitness Profile Tab */}
+      {activeTab === "fitness" && (
+        <>
+          {/* Stats */}
+          <div className="px-5 mb-5">
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: "Workouts", value: stats?.totalWorkouts ?? 0, icon: Dumbbell, color: "text-purple-400" },
+                { label: "Streak", value: stats?.workoutStreak ?? 0, icon: Flame, color: "text-orange-400" },
+                { label: "Minutes", value: stats?.totalMinutes ?? 0, icon: TrendingUp, color: "text-blue-400" },
+                { label: "Badges", value: achievements?.length ?? 0, icon: Trophy, color: "text-yellow-400" },
+              ].map(({ label, value, icon: Icon, color }) => (
+                <div key={label} className="bg-card border border-border rounded-xl p-3 text-center">
+                  <Icon size={16} className={cn("mx-auto mb-1", color)} />
+                  <p className="text-base font-display font-bold text-foreground">{value}</p>
+                  <p className="text-[10px] text-muted-foreground">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Profile details */}
+          <div className="px-5 mb-5">
+            <h3 className="font-semibold text-sm mb-3">Fitness Profile</h3>
+            <div className="bg-card border border-border rounded-2xl divide-y divide-border">
+              {[
+                { label: "Goal", value: GOAL_LABELS[profile?.primaryGoal || ""] || "Not set" },
+                { label: "Level", value: profile?.fitnessLevel ? profile.fitnessLevel.charAt(0).toUpperCase() + profile.fitnessLevel.slice(1) : "Not set" },
+                { label: "Sport", value: profile?.athleteType ? profile.athleteType.replace(/_/g, " ") : "Not set" },
+                { label: "Weight", value: profile?.weightKg ? `${profile.weightKg} kg` : "Not set" },
+                { label: "Height", value: profile?.heightCm ? `${profile.heightCm} cm` : "Not set" },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex items-center justify-between px-4 py-3">
+                  <span className="text-sm text-muted-foreground">{label}</span>
+                  <span className="text-sm font-medium text-foreground capitalize">{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent badges */}
+          {achievements && achievements.length > 0 && (
+            <div className="px-5 mb-5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-sm">Recent Badges</h3>
+                <button onClick={() => navigate("/gamification")} className="text-primary text-xs font-medium">
+                  See all
+                </button>
+              </div>
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+                {achievements.slice(0, 8).map((badge) => (
+                  <div key={badge.id} className="shrink-0 flex flex-col items-center gap-1.5 p-3 bg-card border border-border rounded-2xl min-w-[70px]">
+                    <span className="text-2xl">{badge.badgeIcon}</span>
+                    <p className="text-[10px] text-muted-foreground text-center">{badge.badgeName}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Menu */}
