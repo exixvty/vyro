@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { userAddictions, urgeLog, recoveryMotivations, userProfiles, notificationSettings } from "../../drizzle/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { userAddictions, urgeLog, recoveryMotivations, notificationSettings, userProfiles } from "../../drizzle/schema";
+import { eq, and, desc, like } from "drizzle-orm";
+import { buildCravingAlertNotification } from "../recoveryNotifications";
 import { TRPCError } from "@trpc/server";
 
 /* ─── Premium Guard ──────────────────────────────────────────────────────── */
@@ -166,23 +167,28 @@ export const recoveryRouter = router({
         userId: ctx.user.id,
         addictionId: input.addictionId,
         intensity: 8, // high intensity for craving alert
-        trigger: input.message ?? "User triggered craving alert",
+        trigger: `Craving alert: ${input.message ?? "User requested immediate support"}`,
         copingStrategy: null,
         overcame: false,
       });
       // Send immediate push notification
       const { sendPushToUser } = await import("./notifications");
-      await sendPushToUser(ctx.user.id, {
-        title: "You've Got This! 💪",
-        body: "A craving hit you, but you're stronger. Log it, breathe, and move forward.",
-        tag: "craving-alert",
-        data: {
-          url: "/recovery",
-          type: "craving_alert",
-        },
-      });
+      await sendPushToUser(ctx.user.id, buildCravingAlertNotification(input.addictionId));
       return { id: result.insertId, notificationSent: true };
     }),
+
+  /* ─── Last craving alert status ─── */
+  getCravingAlertStatus: protectedProcedure.query(async ({ ctx }) => {
+    const db = await requirePremium(ctx.user.id, ctx.user.createdAt);
+    const alerts = await db
+      .select({ id: urgeLog.id, addictionId: urgeLog.addictionId, loggedAt: urgeLog.loggedAt })
+      .from(urgeLog)
+      .where(and(eq(urgeLog.userId, ctx.user.id), like(urgeLog.trigger, "Craving alert:%")))
+      .orderBy(desc(urgeLog.loggedAt))
+      .limit(1);
+
+    return alerts[0] ?? null;
+  }),
 
   /* ─── Set sobriety reminder time ─── */
   setSobrietyReminderTime: protectedProcedure

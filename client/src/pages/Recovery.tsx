@@ -378,6 +378,10 @@ export default function Recovery() {
     undefined,
     { enabled: !!isPremium }
   );
+  const { data: lastCravingAlert } = trpc.recovery.getCravingAlertStatus.useQuery(
+    undefined,
+    { enabled: !!isPremium }
+  );
 
   const setSobrietyReminderTime = trpc.recovery.setSobrietyReminderTime.useMutation({
     onSuccess: () => {
@@ -390,6 +394,7 @@ export default function Recovery() {
   const logCravingAlert = trpc.recovery.logCravingAlert.useMutation({
     onSuccess: () => {
       utils.recovery.listAddictions.invalidate();
+      utils.recovery.getCravingAlertStatus.invalidate();
       toast.success("Craving alert sent! You've got this 💪");
     },
     onError: () => toast.error("Failed to send craving alert"),
@@ -397,6 +402,23 @@ export default function Recovery() {
 
   const dailyMotivation = getDailyMotivation();
   const categories = Array.from(new Set(ADDICTION_CATALOGUE.map((a) => a.category)));
+
+  useEffect(() => {
+    if (!isPremium || !addictions?.length) return;
+
+    const query = new URLSearchParams(window.location.search);
+    if (query.get("tab") === "tips") {
+      setTab("tips");
+      return;
+    }
+
+    const addictionId = Number(query.get("addUrge"));
+    if (addictionId && addictions.some((addiction) => addiction.id === addictionId)) {
+      setTab("urge");
+      setSelectedAddictionId(addictionId);
+      setShowUrgeForm(true);
+    }
+  }, [addictions, isPremium]);
 
   /* ─── Premium Gate ─────────────────────────────────────────────────── */
   if (premiumLoading) {
@@ -489,6 +511,39 @@ export default function Recovery() {
       {/* ── TRACKER TAB ── */}
       {tab === "tracker" && (
         <div className="px-5 space-y-4">
+          <section className="rounded-2xl bg-card border border-border p-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Daily reminder</p>
+                <p className="text-xs text-muted-foreground">
+                  {reminderSettings?.sobrietyReminder
+                    ? `Set for ${reminderSettings.sobrietyReminderTime ?? "09:00"}`
+                    : "Currently turned off"}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
+                onClick={() => {
+                  setReminderTime(reminderSettings?.sobrietyReminderTime ?? "09:00");
+                  setShowReminderSettings(true);
+                }}
+              >
+                <Clock size={14} className="mr-1.5" />
+                Edit
+              </Button>
+            </div>
+            <div className="pt-3 border-t border-border/70">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Last craving alert</p>
+              <p className="text-xs text-foreground">
+                {lastCravingAlert?.loggedAt
+                  ? new Date(lastCravingAlert.loggedAt).toLocaleString()
+                  : "No craving alert sent yet"}
+              </p>
+            </div>
+          </section>
+
           {addictionsLoading ? (
             <div className="space-y-3">
               {[1, 2].map((i) => <div key={i} className="h-48 rounded-2xl bg-card border border-border animate-pulse" />)}
@@ -745,6 +800,42 @@ export default function Recovery() {
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* ══ REMINDER SETTINGS ══ */}
+      {showReminderSettings && (
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-2xl bg-card border border-border p-5 space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-display font-bold text-foreground">Daily reminder</h2>
+                <p className="text-xs text-muted-foreground mt-1">Choose when you want your recovery check-in.</p>
+              </div>
+              <button onClick={() => setShowReminderSettings(false)} className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center" aria-label="Close reminder settings">
+                <X size={16} />
+              </button>
+            </div>
+            <label className="block space-y-2">
+              <span className="text-xs font-semibold text-muted-foreground">Reminder time</span>
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(event) => setReminderTime(event.target.value)}
+                className="w-full h-12 rounded-xl bg-muted border border-border px-3 text-foreground outline-none focus:ring-2 focus:ring-primary/40"
+              />
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="rounded-xl" onClick={() => setShowReminderSettings(false)}>Cancel</Button>
+              <Button
+                className="rounded-xl"
+                disabled={setSobrietyReminderTime.isPending}
+                onClick={() => setSobrietyReminderTime.mutate({ time: reminderTime, enabled: true })}
+              >
+                Save reminder
+              </Button>
+            </div>
           </div>
         </div>
       )}

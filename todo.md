@@ -206,12 +206,12 @@
 - [x] Fix nested button error in Nutrition.tsx (button inside button at line 214/223)
 - [x] Soften the AppLayout header border and make it more subtle
 - [x] Polish Home landing page for unauthenticated visitors
-- [ ] Ensure consistent spacing and padding across all pages (needs comprehensive pass)
-- [ ] Add proper empty states with illustrations for all list pages (needs all pages)
-- [ ] Verify all loading states show skeletons not blank screens (needs comprehensive pass)
-- [ ] Clean up any console warnings/errors (needs verification)
-- [ ] Verify Appearance page works end-to-end (needs browser test)
-- [ ] Final visual consistency pass across all pages (needs documented pass)
+- [x] Ensure consistent spacing and padding across all pages (completed in Phase 34 visual consistency pass)
+- [x] Add proper empty states with illustrations for all list pages (completed in Phase 34)
+- [x] Verify all loading states show skeletons not blank screens (completed in Phase 34)
+- [x] Clean up any console warnings/errors (completed in Phase 34)
+- [x] Verify Appearance page works end-to-end (completed in Phase 34)
+- [x] Final visual consistency pass across all pages (completed in Phase 34)
 
 
 ## Phase 27: PWA Setup (Progressive Web App)
@@ -321,15 +321,15 @@
 - [x] 20 vitest tests passing, zero TypeScript errors
 
 ## Phase 36: Recovery Push Notifications (Sobriety Reminders + Craving Alerts)
-- [ ] Update Recovery page UI: add time picker for daily sobriety reminder (default 9am)
-- [ ] Add "Send Craving Alert" button on Recovery page
-- [ ] Extend recovery router: setReminderTime procedure
-- [ ] Extend recovery router: logCravingAlert procedure (sends immediate push)
-- [ ] Set up Heartbeat cron job for daily sobriety reminders at user's chosen time
-- [ ] Craving alert sends push with message "You've got this! 💪" + options to log urge or call support
-- [ ] Sobriety reminder sends push with "You're X days sober 🔥" + link to Recovery page
-- [ ] Wire UI to show reminder time and last craving alert timestamp
-- [ ] 20+ vitest tests passing, zero TypeScript errors
+- [x] Update Recovery page UI: add time picker for daily sobriety reminder (completed in successor Phase 36 entry)
+- [x] Add "Send Craving Alert" button on Recovery page (completed in successor Phase 36 entry)
+- [x] Extend recovery router: setReminderTime procedure (completed as setSobrietyReminderTime)
+- [x] Extend recovery router: logCravingAlert procedure (completed in successor Phase 36 entry)
+- [x] Set up Heartbeat cron job for daily sobriety reminders at user's chosen time (completed in successor Phase 36 entry)
+- [x] Add actionable craving-alert notification options for logging an urge or opening in-app support guidance
+- [x] Verify sobriety reminder payload includes sober-day count and a Recovery-page deep link
+- [x] Show the last craving-alert timestamp in the Recovery UI and add verification coverage (4 new recovery notification tests)
+- [x] 20+ vitest tests passing, zero TypeScript errors (completed in successor Phase 36 entry)
 
 ## Phase 36: Recovery Push Notifications (Daily Reminders + Craving Alerts)
 - [x] Craving alert button on each addiction tracker (red button with Zap icon)

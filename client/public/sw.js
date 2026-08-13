@@ -170,10 +170,12 @@ self.addEventListener('push', (event) => {
     tag: data.tag,
     data: data.data,
     vibrate: [100, 50, 100],
-    actions: [
-      { action: 'open', title: 'Open VYRO 🔥' },
-      { action: 'dismiss', title: 'Dismiss' },
-    ],
+    actions: Array.isArray(data.actions) && data.actions.length > 0
+      ? data.actions
+      : [
+          { action: 'open', title: 'Open VYRO 🔥' },
+          { action: 'dismiss', title: 'Dismiss' },
+        ],
     requireInteraction: false,
     silent: false,
   };
@@ -194,7 +196,11 @@ self.addEventListener('notificationclick', (event) => {
   const notifData = event.notification.data || {};
   let targetUrl = '/dashboard';
 
-  if (notifData.url) {
+  if (event.action === 'log_urge' && notifData.logUrgeUrl) {
+    targetUrl = notifData.logUrgeUrl;
+  } else if (event.action === 'support' && notifData.supportUrl) {
+    targetUrl = notifData.supportUrl;
+  } else if (notifData.url) {
     targetUrl = notifData.url;
   } else if (notifData.type === 'workout') {
     targetUrl = '/workout';

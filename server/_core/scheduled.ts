@@ -4,6 +4,7 @@ import { notificationSettings, userAddictions } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import { sendPushToUser } from "../routers/notifications";
 import { sdk } from "./sdk";
+import { buildSobrietyReminderNotification } from "../recoveryNotifications";
 
 /**
  * Daily sobriety reminder handler
@@ -57,17 +58,10 @@ export async function sendSobrietyRemindersHandler(req: Request, res: Response) 
 
         // Send personalized push notification
         const addictionList = addictions.map((a) => a.addictionLabel).join(", ");
-        await sendPushToUser(setting.userId, {
-          title: "You're Stronger Every Day 💪",
-          body: `${avgDays} days free from ${addictionList}. Keep going!`,
-          tag: "sobriety-reminder",
-          data: {
-            url: "/recovery",
-            type: "sobriety_reminder",
-            avgDays,
-            addictionCount: addictions.length,
-          },
-        });
+        await sendPushToUser(
+          setting.userId,
+          buildSobrietyReminderNotification(avgDays, addictionList, addictions.length)
+        );
 
         sentCount++;
       } catch (err) {

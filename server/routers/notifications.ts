@@ -20,7 +20,15 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 // ── Helper: send push to all user subscriptions ───────────────────────────────
 export async function sendPushToUser(
   userId: number,
-  payload: { title: string; body: string; icon?: string; badge?: string; tag?: string; data?: Record<string, unknown> }
+  payload: {
+    title: string;
+    body: string;
+    icon?: string;
+    badge?: string;
+    tag?: string;
+    data?: Record<string, unknown>;
+    actions?: Array<{ action: string; title: string }>;
+  }
 ) {
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return;
 
@@ -39,6 +47,7 @@ export async function sendPushToUser(
     badge: payload.badge ?? "/icon-192.png",
     tag: payload.tag ?? "vyro-notification",
     data: payload.data ?? {},
+    actions: payload.actions,
   });
 
   const results = await Promise.allSettled(
