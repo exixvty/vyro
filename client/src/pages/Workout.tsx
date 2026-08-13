@@ -33,6 +33,19 @@ import { format } from "date-fns";
 import { useLocation } from "wouter";
 import { CheckmarkButton, ConfettiEffect, XPGainToast } from "@/components/Interactive";
 import { checkAndEmitLevelUp } from "@/hooks/useLevelUp";
+import {
+  addActiveSet,
+  appendActiveExercise,
+  canFinishActiveWorkout,
+  completedExercisePayload,
+  cycleActiveSetType,
+  elapsedSeconds,
+  removeActiveExercise,
+  removeActiveSet,
+  replaceExerciseSets,
+  resetActiveWorkout,
+  toggleActiveSetCompletion,
+} from "@/lib/activeWorkout";
 
 /* ─── Types ───────────────────────────────────────────────────────────── */
 interface ExerciseFromDB {
@@ -66,6 +79,15 @@ interface WorkoutExercise {
   restSeconds: number;
 }
 
+interface ActiveWorkoutDraft {
+  name: string;
+  exercises: WorkoutExercise[];
+  globalUnit: "kg" | "lbs";
+  startedAt: number;
+}
+
+const ACTIVE_WORKOUT_STORAGE_KEY = "vyro.active-workout.v1";
+
 /* ─── Main Workout Page ───────────────────────────────────────────────── */
 export default function Workout() {
   const [, navigate] = useLocation();
@@ -75,8 +97,61 @@ export default function Workout() {
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [activeTab, setActiveTab] = useState<"new" | "history">("new");
   const [globalUnit, setGlobalUnit] = useState<"kg" | "lbs">("kg");
+  const [activeStartedAt, setActiveStartedAt] = useState<number | null>(null);
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
+  const utils = trpc.useUtils();
 
   const { data: sessions } = trpc.workout.getSessions.useQuery({ limit: 20 });
+
+  useEffect(() => {
+    try {
+      const storedDraft = window.localStorage.getItem(ACTIVE_WORKOUT_STORAGE_KEY);
+      if (!storedDraft) return;
+
+      const draft = JSON.parse(storedDraft) as ActiveWorkoutDraft;
+      if (!draft.name || !Array.isArray(draft.exercises) || !draft.startedAt) {
+        window.localStorage.removeItem(ACTIVE_WORKOUT_STORAGE_KEY);
+        return;
+      }
+
+      setWorkoutName(draft.name);
+      setWorkoutExercises(draft.exercises);
+      setGlobalUnit(draft.globalUnit === "lbs" ? "lbs" : "kg");
+      setActiveStartedAt(draft.startedAt);
+      setView("active");
+      setHasRestoredDraft(true);
+    } catch {
+      window.localStorage.removeItem(ACTIVE_WORKOUT_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (view !== "active" || !activeStartedAt) return;
+    const draft: ActiveWorkoutDraft = {
+      name: workoutName,
+      exercises: workoutExercises,
+      globalUnit,
+      startedAt: activeStartedAt,
+    };
+    window.localStorage.setItem(ACTIVE_WORKOUT_STORAGE_KEY, JSON.stringify(draft));
+  }, [view, workoutName, workoutExercises, globalUnit, activeStartedAt]);
+
+  useEffect(() => {
+    if (hasRestoredDraft) {
+      toast("Resumed your in-progress workout", { icon: "💪" });
+      setHasRestoredDraft(false);
+    }
+  }, [hasRestoredDraft]);
+
+  const clearActiveWorkout = () => {
+    const reset = resetActiveWorkout();
+    window.localStorage.removeItem(ACTIVE_WORKOUT_STORAGE_KEY);
+    setView("main");
+    setWorkoutExercises(reset.exercises as WorkoutExercise[]);
+    setWorkoutName(reset.name);
+    setActiveStartedAt(reset.startedAt);
+    setShowExercisePicker(false);
+  };
 
   const handleStartWorkout = () => {
     if (!workoutName.trim()) {
@@ -87,6 +162,7 @@ export default function Workout() {
       toast.error("Add at least one exercise");
       return;
     }
+    setActiveStartedAt(Date.now());
     setView("active");
   };
 
@@ -103,40 +179,26 @@ export default function Workout() {
       notes: "",
       restSeconds: 90,
     };
-    setWorkoutExercises((prev) => [...prev, newEx]);
+    setWorkoutExercises((prev) => appendActiveExercise(prev, newEx));
     setShowExercisePicker(false);
     toast.success(`${ex.name} added`);
   };
 
   const handleRemoveExercise = (localId: string) => {
-    setWorkoutExercises((prev) => prev.filter((e) => e.localId !== localId));
+    setWorkoutExercises((prev) => removeActiveExercise(prev, localId));
   };
 
   const handleUpdateSets = (localId: string, sets: SetData[]) => {
-    setWorkoutExercises((prev) =>
-      prev.map((e) => (e.localId === localId ? { ...e, sets } : e))
-    );
+    setWorkoutExercises((prev) => replaceExerciseSets(prev, localId, sets));
   };
 
   const handleAddSet = (localId: string) => {
     setWorkoutExercises((prev) =>
       prev.map((e) => {
         if (e.localId !== localId) return e;
-        const lastSet = e.sets[e.sets.length - 1];
         return {
           ...e,
-          sets: [
-            ...e.sets,
-            {
-              id: `s-${Date.now()}-${Math.random()}`,
-              setNumber: e.sets.length + 1,
-              weight: lastSet?.weight || 0,
-              reps: lastSet?.reps || 0,
-              weightUnit: lastSet?.weightUnit || globalUnit,
-              completed: false,
-              type: "normal" as const,
-            },
-          ],
+          sets: addActiveSet(e.sets, globalUnit, `s-${Date.now()}-${Math.random()}`),
         };
       })
     );
@@ -146,8 +208,7 @@ export default function Workout() {
     setWorkoutExercises((prev) =>
       prev.map((e) => {
         if (e.localId !== localId) return e;
-        const filtered = e.sets.filter((s) => s.id !== setId);
-        return { ...e, sets: filtered.map((s, i) => ({ ...s, setNumber: i + 1 })) };
+        return { ...e, sets: removeActiveSet(e.sets, setId) };
       })
     );
   };
@@ -170,16 +231,18 @@ export default function Workout() {
         name={workoutName}
         exercises={workoutExercises}
         globalUnit={globalUnit}
+        startedAt={activeStartedAt ?? Date.now()}
         onUpdateSets={handleUpdateSets}
         onAddSet={handleAddSet}
         onRemoveSet={handleRemoveSet}
+        onRemoveExercise={handleRemoveExercise}
         onAddExercise={() => setShowExercisePicker(true)}
         onFinish={() => {
-          setView("main");
-          setWorkoutExercises([]);
-          setWorkoutName("");
+          utils.workout.getSessions.invalidate();
+          clearActiveWorkout();
         }}
-        onCancel={() => setView("main")}
+        onCancel={clearActiveWorkout}
+        onRename={setWorkoutName}
         showExercisePicker={showExercisePicker}
         setShowExercisePicker={setShowExercisePicker}
         handleAddExercise={handleAddExercise}
@@ -464,12 +527,15 @@ function ActiveSession({
   name,
   exercises,
   globalUnit,
+  startedAt,
   onUpdateSets,
   onAddSet,
   onRemoveSet,
+  onRemoveExercise,
   onAddExercise,
   onFinish,
   onCancel,
+  onRename,
   showExercisePicker,
   setShowExercisePicker,
   handleAddExercise,
@@ -477,21 +543,27 @@ function ActiveSession({
   name: string;
   exercises: WorkoutExercise[];
   globalUnit: "kg" | "lbs";
+  startedAt: number;
   onUpdateSets: (localId: string, sets: SetData[]) => void;
   onAddSet: (localId: string) => void;
   onRemoveSet: (localId: string, setId: string) => void;
+  onRemoveExercise: (localId: string) => void;
   onAddExercise: () => void;
   onFinish: () => void;
   onCancel: () => void;
+  onRename: (name: string) => void;
   showExercisePicker: boolean;
   setShowExercisePicker: (v: boolean) => void;
   handleAddExercise: (ex: ExerciseFromDB) => void;
 }) {
-  const [elapsed, setElapsed] = useState(0);
+  const [elapsed, setElapsed] = useState(() => elapsedSeconds(startedAt));
   const [restTimer, setRestTimer] = useState(0);
   const [restActive, setRestActive] = useState(false);
   const [rating, setRating] = useState(4);
   const [showFinishModal, setShowFinishModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [nameDraft, setNameDraft] = useState(name);
   const [showFinishConfetti, setShowFinishConfetti] = useState(false);
   const [xpGain, setXpGain] = useState<{ visible: boolean; amount: number }>({ visible: false, amount: 0 });
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -514,6 +586,10 @@ function ActiveSession({
     timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
+
+  useEffect(() => {
+    setNameDraft(name);
+  }, [name]);
 
   // Rest timer
   useEffect(() => {
@@ -550,7 +626,7 @@ function ActiveSession({
     const set = ex.sets.find((s) => s.id === setId);
     if (!set) return;
 
-    onUpdateSets(localId, ex.sets.map((s) => s.id === setId ? { ...s, completed: !s.completed } : s));
+    onUpdateSets(localId, toggleActiveSetCompletion(ex.sets, setId));
 
     if (!set.completed) {
       startRest(ex.restSeconds);
@@ -561,15 +637,13 @@ function ActiveSession({
   };
 
   const handleFinishWorkout = () => {
-    const exerciseData = exercises.map((e) => ({
-      name: e.exercise.name,
-      sets: e.sets.filter((s) => s.completed).map((s) => ({
-        reps: s.reps,
-        weight: s.weight,
-        weightUnit: s.weightUnit,
-        type: s.type,
-      })),
-    }));
+    if (!canFinishActiveWorkout(exercises)) {
+      toast.error("Complete at least one set before finishing, or cancel this workout.");
+      setShowFinishModal(false);
+      return;
+    }
+
+    const exerciseData = completedExercisePayload(exercises);
 
     logSession.mutate({
       title: name,
@@ -590,12 +664,37 @@ function ActiveSession({
 
       {/* Header */}
       <div className="px-4 pt-12 pb-3 flex items-center justify-between border-b border-border bg-background">
-        <button onClick={onCancel} className="flex items-center gap-1 text-muted-foreground">
+        <button onClick={() => setShowCancelModal(true)} className="flex items-center gap-1 text-muted-foreground">
           <ArrowLeft size={18} />
           <span className="text-sm">Cancel</span>
         </button>
-        <div className="text-center">
-          <p className="font-display font-bold text-foreground text-sm">{name}</p>
+        <div className="text-center min-w-0 max-w-[48%]">
+          {isRenaming ? (
+            <input
+              autoFocus
+              value={nameDraft}
+              onChange={(event) => setNameDraft(event.target.value)}
+              onBlur={() => {
+                const trimmedName = nameDraft.trim();
+                if (trimmedName) onRename(trimmedName);
+                else setNameDraft(name);
+                setIsRenaming(false);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") event.currentTarget.blur();
+                if (event.key === "Escape") {
+                  setNameDraft(name);
+                  setIsRenaming(false);
+                }
+              }}
+              className="w-full h-7 rounded-md bg-muted px-2 text-center font-display font-bold text-foreground text-sm outline-none focus:ring-1 focus:ring-primary"
+              aria-label="Workout name"
+            />
+          ) : (
+            <button onClick={() => setIsRenaming(true)} className="font-display font-bold text-foreground text-sm truncate max-w-full" title="Rename workout">
+              {name}
+            </button>
+          )}
           <p className="text-primary font-mono text-lg font-bold">{formatTime(elapsed)}</p>
         </div>
         <button
@@ -669,6 +768,7 @@ function ActiveSession({
             onUpdateSets={(sets) => onUpdateSets(wex.localId, sets)}
             onAddSet={() => onAddSet(wex.localId)}
             onRemoveSet={(setId) => onRemoveSet(wex.localId, setId)}
+            onRemove={() => onRemoveExercise(wex.localId)}
           />
         ))}
 
@@ -740,6 +840,31 @@ function ActiveSession({
         </div>
       )}
 
+      {/* Cancel confirmation */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-end justify-center">
+          <div className="bg-card w-full max-w-[430px] rounded-t-3xl p-6 space-y-5 animate-slide-up">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-display font-bold text-foreground">Cancel workout?</h3>
+              <button onClick={() => setShowCancelModal(false)} className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center" aria-label="Keep workout">
+                <X size={16} />
+              </button>
+            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              This will discard your in-progress exercises and sets. This action cannot be undone.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="h-12 rounded-xl" onClick={() => setShowCancelModal(false)}>
+                Keep Workout
+              </Button>
+              <Button className="h-12 rounded-xl bg-red-500 text-white hover:bg-red-600" onClick={() => { onCancel(); toast("Workout cancelled"); }}>
+                Discard Workout
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Exercise Picker */}
       {showExercisePicker && (
         <ExercisePicker
@@ -759,6 +884,7 @@ function ActiveExerciseCard({
   onUpdateSets,
   onAddSet,
   onRemoveSet,
+  onRemove,
 }: {
   exercise: WorkoutExercise;
   globalUnit: "kg" | "lbs";
@@ -766,6 +892,7 @@ function ActiveExerciseCard({
   onUpdateSets: (sets: SetData[]) => void;
   onAddSet: () => void;
   onRemoveSet: (setId: string) => void;
+  onRemove: () => void;
 }) {
   const updateSet = (setId: string, field: keyof SetData, value: any) => {
     onUpdateSets(
@@ -784,13 +911,22 @@ function ActiveExerciseCard({
           <p className="font-semibold text-sm text-foreground">{exercise.exercise.name}</p>
           <p className="text-xs text-muted-foreground capitalize">{exercise.exercise.category}</p>
         </div>
+        <button
+          onClick={onRemove}
+          className="w-9 h-9 rounded-lg hover:bg-red-500/10 flex items-center justify-center"
+          aria-label={`Remove ${exercise.exercise.name}`}
+          title="Remove exercise"
+        >
+          <Trash2 size={16} className="text-muted-foreground hover:text-red-400" />
+        </button>
       </div>
 
       {/* Table Header */}
-      <div className="px-4 pt-3 grid grid-cols-[36px_1fr_1fr_44px] gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest pb-2">
+      <div className="px-4 pt-3 grid grid-cols-[36px_1fr_1fr_32px_44px] gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest pb-2">
         <span className="text-center">Set</span>
         <span className="text-center">{globalUnit.toUpperCase()}</span>
         <span className="text-center">Reps</span>
+        <span></span>
         <span className="text-center">
           <CheckCircle2 size={12} className="mx-auto" />
         </span>
@@ -802,22 +938,28 @@ function ActiveExerciseCard({
           <div
             key={set.id}
             className={cn(
-              "grid grid-cols-[36px_1fr_1fr_44px] gap-2 items-center py-1 rounded-lg",
+              "grid grid-cols-[36px_1fr_1fr_32px_44px] gap-2 items-center py-1 rounded-lg",
               set.completed ? "bg-green-500/10" : ""
             )}
             style={{
               transition: "background 0.4s ease",
             }}
           >
-            <div className={cn(
-              "w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold mx-auto",
-              set.type === "warmup" ? "bg-yellow-500/20 text-yellow-400" :
-              set.type === "dropset" ? "bg-blue-500/20 text-blue-400" :
-              set.type === "failure" ? "bg-red-500/20 text-red-400" :
-              set.completed ? "bg-green-500/20 text-green-400" : "bg-muted text-muted-foreground"
-            )}>
+            <button
+              onClick={() => {
+                updateSet(set.id, "type", cycleActiveSetType(set.type));
+              }}
+              title="Change set type"
+              className={cn(
+                "w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold mx-auto",
+                set.type === "warmup" ? "bg-yellow-500/20 text-yellow-400" :
+                set.type === "dropset" ? "bg-blue-500/20 text-blue-400" :
+                set.type === "failure" ? "bg-red-500/20 text-red-400" :
+                set.completed ? "bg-green-500/20 text-green-400" : "bg-muted text-muted-foreground"
+              )}
+            >
               {set.type === "warmup" ? "W" : set.type === "dropset" ? "D" : set.type === "failure" ? "F" : set.setNumber}
-            </div>
+            </button>
 
             <input
               type="number"
@@ -842,6 +984,15 @@ function ActiveExerciseCard({
                 set.completed ? "bg-green-500/10 text-green-300 border border-green-500/30" : "bg-muted/60 border border-transparent focus:border-primary/40 text-foreground"
               )}
             />
+
+            <button
+              onClick={() => onRemoveSet(set.id)}
+              className="w-7 h-7 rounded-lg hover:bg-red-500/10 flex items-center justify-center"
+              aria-label={`Remove set ${set.setNumber}`}
+              title="Remove set"
+            >
+              <Minus size={13} className="text-muted-foreground hover:text-red-400" />
+            </button>
 
             <div className="flex items-center justify-center">
               <CheckmarkButton

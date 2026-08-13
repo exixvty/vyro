@@ -361,3 +361,14 @@
 - [x] Create premium access integration tests (32 tests)
 - [x] Create premium features gating tests (33 tests)
 - [x] 119 vitest tests passing, zero TypeScript errors
+
+## Phase 39: Active Workout Reliability
+- [x] Audit the in-progress workout UI, workout session model, and API procedures
+- [x] Support adding and removing sets while a workout is active
+- [x] Support editing completed and planned set values during a workout
+- [x] Support adding and removing exercises from an active workout
+- [x] Persist in-progress workout changes reliably between UI actions
+- [x] Support cancelling an active workout without recording it as complete
+- [x] Support finishing an active workout with an accurate summary and XP award
+- [x] Add regression tests for all active workout actions (13 active-workout tests)
+- [x] Verify TypeScript and complete test suite pass (132 tests)
