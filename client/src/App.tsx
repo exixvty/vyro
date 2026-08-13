@@ -1,100 +1,117 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
+import { lazy, Suspense } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { VyroThemeProvider } from "./contexts/VyroThemeContext";
-import Home from "./pages/Home";
-import Onboarding from "./pages/Onboarding";
-import Dashboard from "./pages/Dashboard";
-import Workout from "./pages/Workout";
-import Nutrition from "./pages/Nutrition";
-import Progress from "./pages/Progress";
-import Habits from "./pages/Habits";
-import Library from "./pages/Library";
-import Gamification from "./pages/Gamification";
-import Social from "./pages/Social";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
-import Premium from "./pages/Premium";
-import Referral from "./pages/Referral";
-import Friends from "./pages/Friends";
-import WorkoutBuilder from "./pages/WorkoutBuilder";
-import Tiers from "./pages/Tiers";
-import Performance from "./pages/Performance";
-import Appearance from "./pages/Appearance";
-import Notifications from "./pages/Notifications";
-import Recovery from "./pages/Recovery";
 import AppLayout from "./components/AppLayout";
 import { XPToastProvider } from "./components/XPToastProvider";
 
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const Home = lazy(() => import("@/pages/Home"));
+const Onboarding = lazy(() => import("@/pages/Onboarding"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Workout = lazy(() => import("@/pages/Workout"));
+const Nutrition = lazy(() => import("@/pages/Nutrition"));
+const Progress = lazy(() => import("@/pages/Progress"));
+const Habits = lazy(() => import("@/pages/Habits"));
+const Library = lazy(() => import("@/pages/Library"));
+const Gamification = lazy(() => import("@/pages/Gamification"));
+const Social = lazy(() => import("@/pages/Social"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const Premium = lazy(() => import("@/pages/Premium"));
+const Referral = lazy(() => import("@/pages/Referral"));
+const Friends = lazy(() => import("@/pages/Friends"));
+const WorkoutBuilder = lazy(() => import("@/pages/WorkoutBuilder"));
+const Tiers = lazy(() => import("@/pages/Tiers"));
+const Performance = lazy(() => import("@/pages/Performance"));
+const Appearance = lazy(() => import("@/pages/Appearance"));
+const Notifications = lazy(() => import("@/pages/Notifications"));
+const Recovery = lazy(() => import("@/pages/Recovery"));
+
+function PageLoadingFallback() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-live="polite">
+      <div className="flex flex-col items-center gap-3 text-muted-foreground">
+        <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center animate-pulse">
+          <span className="text-primary font-display font-bold">V</span>
+        </div>
+        <span className="text-sm">Loading VYRO…</span>
+      </div>
+    </div>
+  );
+}
+
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/onboarding" component={Onboarding} />
-      <Route path="/dashboard">
-        <AppLayout><Dashboard /></AppLayout>
-      </Route>
-      <Route path="/workout">
-        <AppLayout><Workout /></AppLayout>
-      </Route>
-      <Route path="/workout/builder">
-        <AppLayout><WorkoutBuilder /></AppLayout>
-      </Route>
-      <Route path="/nutrition">
-        <AppLayout><Nutrition /></AppLayout>
-      </Route>
-      <Route path="/fuel">
-        <AppLayout><Nutrition /></AppLayout>
-      </Route>
-      <Route path="/progress">
-        <AppLayout><Progress /></AppLayout>
-      </Route>
-      <Route path="/habits">
-        <AppLayout><Habits /></AppLayout>
-      </Route>
-      <Route path="/library">
-        <AppLayout><Library /></AppLayout>
-      </Route>
-      <Route path="/gamification">
-        <AppLayout><Gamification /></AppLayout>
-      </Route>
-      <Route path="/social">
-        <AppLayout><Social /></AppLayout>
-      </Route>
-      <Route path="/profile">
-        <AppLayout><Profile /></AppLayout>
-      </Route>
-      <Route path="/settings">
-        <AppLayout><Settings /></AppLayout>
-      </Route>
-      <Route path="/premium" component={Premium} />
-      <Route path="/referral">
-        <AppLayout><Referral /></AppLayout>
-      </Route>
-      <Route path="/friends">
-        <AppLayout><Friends /></AppLayout>
-      </Route>
-      <Route path="/tiers">
-        <AppLayout><Tiers /></AppLayout>
-      </Route>
-      <Route path="/performance">
-        <AppLayout><Performance /></AppLayout>
-      </Route>
-      <Route path="/appearance">
-        <AppLayout><Appearance /></AppLayout>
-      </Route>
-      <Route path="/notifications">
-        <AppLayout><Notifications /></AppLayout>
-      </Route>
-      <Route path="/recovery">
-        <AppLayout><Recovery /></AppLayout>
-      </Route>
-      <Route path="/404" component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<PageLoadingFallback />}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/onboarding" component={Onboarding} />
+        <Route path="/dashboard">
+          <AppLayout><Dashboard /></AppLayout>
+        </Route>
+        <Route path="/workout">
+          <AppLayout><Workout /></AppLayout>
+        </Route>
+        <Route path="/workout/builder">
+          <AppLayout><WorkoutBuilder /></AppLayout>
+        </Route>
+        <Route path="/nutrition">
+          <AppLayout><Nutrition /></AppLayout>
+        </Route>
+        <Route path="/fuel">
+          <AppLayout><Nutrition /></AppLayout>
+        </Route>
+        <Route path="/progress">
+          <AppLayout><Progress /></AppLayout>
+        </Route>
+        <Route path="/habits">
+          <AppLayout><Habits /></AppLayout>
+        </Route>
+        <Route path="/library">
+          <AppLayout><Library /></AppLayout>
+        </Route>
+        <Route path="/gamification">
+          <AppLayout><Gamification /></AppLayout>
+        </Route>
+        <Route path="/social">
+          <AppLayout><Social /></AppLayout>
+        </Route>
+        <Route path="/profile">
+          <AppLayout><Profile /></AppLayout>
+        </Route>
+        <Route path="/settings">
+          <AppLayout><Settings /></AppLayout>
+        </Route>
+        <Route path="/premium" component={Premium} />
+        <Route path="/referral">
+          <AppLayout><Referral /></AppLayout>
+        </Route>
+        <Route path="/friends">
+          <AppLayout><Friends /></AppLayout>
+        </Route>
+        <Route path="/tiers">
+          <AppLayout><Tiers /></AppLayout>
+        </Route>
+        <Route path="/performance">
+          <AppLayout><Performance /></AppLayout>
+        </Route>
+        <Route path="/appearance">
+          <AppLayout><Appearance /></AppLayout>
+        </Route>
+        <Route path="/notifications">
+          <AppLayout><Notifications /></AppLayout>
+        </Route>
+        <Route path="/recovery">
+          <AppLayout><Recovery /></AppLayout>
+        </Route>
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 

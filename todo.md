@@ -129,7 +129,7 @@
 - [x] Enhanced Dashboard: today screen, XP bar, streak, quick start button (UI) — Home.tsx redesigned
 - [x] Smart notifications: motivational, non-spammy, toggleable (UI) — Notifications page with settings
 - [x] Personalized motivation messages based on user goals (UI) — Daily motivation in Recovery
-- [ ] Performance optimization and testing (needs profiling and optimization pass)
+- [x] Performance optimization and testing (route-level lazy loading, vendor chunking, production build, TypeScript, and 132-test suite verified)
 
 
 ## Phase 17: Visible Tier Ranking System (Liftoff-Inspired)
@@ -372,3 +372,9 @@
 - [x] Support finishing an active workout with an accurate summary and XP award
 - [x] Add regression tests for all active workout actions (13 active-workout tests)
 - [x] Verify TypeScript and complete test suite pass (132 tests)
+
+## Phase 40: Performance Optimization Verification
+- [x] Run a successful post-optimization production build and record final bundle/chunk sizes
+- [x] Verify the global CSS import warning is resolved in the production build log
+- [x] Run the full Vitest suite after lazy loading changes
+- [x] Document before/after initial bundle results and affected routes (page routes lazy-load; initial entry is 62.9 kB, with cacheable vendor chunks)
