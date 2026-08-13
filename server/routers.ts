@@ -12,6 +12,7 @@ import { engagementRouter } from "./routers/engagement";
 import { themeRouter } from "./routers/theme";
 import { notificationsRouter } from "./routers/notifications";
 import { recoveryRouter } from "./routers/recovery";
+import { getPremiumAccess, getTrialEndDate } from "./premiumAccess";
 
 import {
   userProfiles,
@@ -75,6 +76,30 @@ const profileRouter = router({
         .onDuplicateKeyUpdate({ set: input });
       return { success: true };
     }),
+
+  startTrial: protectedProcedure.mutation(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new Error("DB unavailable");
+
+    const access = await getPremiumAccess(db, ctx.user.id, ctx.user.createdAt);
+    if (access.isPaidPremium) {
+      return { started: false, reason: "already_premium", trialExpiresAt: access.trialExpiresAt };
+    }
+    if (access.isInTrial) {
+      return { started: false, reason: "already_active", trialExpiresAt: access.trialExpiresAt };
+    }
+    if (access.profile?.trialStartedAt) {
+      return { started: false, reason: "already_used", trialExpiresAt: access.trialExpiresAt };
+    }
+
+    const startedAt = new Date();
+    const trialExpiresAt = getTrialEndDate(startedAt);
+    await db.insert(userProfiles)
+      .values({ userId: ctx.user.id, trialStartedAt: startedAt, trialExpiresAt })
+      .onDuplicateKeyUpdate({ set: { trialStartedAt: startedAt, trialExpiresAt } });
+
+    return { started: true, reason: "started", trialExpiresAt };
+  }),
 });
 
 // ─── Workout Router ───────────────────────────────────────────────────────────
@@ -196,36 +221,41 @@ Return a JSON object with this exact structure:
         ...input,
       });
 
-      // Update game stats
       const xpEarned = Math.floor(input.durationMinutes * 2);
-      await awardXP(db, ctx.user.id, xpEarned, "Completed workout");
 
-      // Update stats
-      await db
-        .insert(userGameStats)
-        .values({
+      // The completed session is the source of truth. Engagement side effects must
+      // never trap an athlete in an active workout if an auxiliary write is delayed.
+      const sideEffects = await Promise.allSettled([
+        awardXPWithLevelUp(db, ctx.user.id, xpEarned, "Completed workout"),
+        db
+          .insert(userGameStats)
+          .values({
+            userId: ctx.user.id,
+            totalWorkouts: 1,
+            totalMinutes: input.durationMinutes,
+            workoutStreak: 1,
+          })
+          .onDuplicateKeyUpdate({
+            set: {
+              totalWorkouts: sql`totalWorkouts + 1`,
+              totalMinutes: sql`totalMinutes + ${input.durationMinutes}`,
+            },
+          }),
+        db.insert(activityFeed).values({
           userId: ctx.user.id,
-          totalWorkouts: 1,
-          totalMinutes: input.durationMinutes,
-          workoutStreak: 1,
-        })
-        .onDuplicateKeyUpdate({
-          set: {
-            totalWorkouts: sql`totalWorkouts + 1`,
-            totalMinutes: sql`totalMinutes + ${input.durationMinutes}`,
-          },
-        });
+          type: "workout_completed",
+          title: `Completed "${input.title}"`,
+          description: `${input.durationMinutes} minutes · ${input.caloriesBurned || 0} calories burned`,
+          metadata: { type: input.type, duration: input.durationMinutes },
+        }),
+      ]);
 
-      // Add to activity feed
-      await db.insert(activityFeed).values({
-        userId: ctx.user.id,
-        type: "workout_completed",
-        title: `Completed "${input.title}"`,
-        description: `${input.durationMinutes} minutes · ${input.caloriesBurned || 0} calories burned`,
-        metadata: { type: input.type, duration: input.durationMinutes },
-      });
+      const levelUp = sideEffects[0].status === "fulfilled" ? sideEffects[0].value : undefined;
+      if (sideEffects.some((result) => result.status === "rejected")) {
+        console.error("Workout completion side effect failed", sideEffects);
+      }
 
-      return { success: true, xpEarned };
+      return { success: true, xpEarned, ...levelUp };
     }),
 
   getSessions: protectedProcedure

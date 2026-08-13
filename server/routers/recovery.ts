@@ -1,29 +1,18 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { userAddictions, urgeLog, recoveryMotivations, notificationSettings, userProfiles } from "../../drizzle/schema";
+import { userAddictions, urgeLog, recoveryMotivations, notificationSettings } from "../../drizzle/schema";
 import { eq, and, desc, like } from "drizzle-orm";
 import { buildCravingAlertNotification } from "../recoveryNotifications";
+import { getPremiumAccess } from "../premiumAccess";
 import { TRPCError } from "@trpc/server";
 
 /* ─── Premium Guard ──────────────────────────────────────────────────────── */
-const TRIAL_DAYS = 21;
-
 async function requirePremium(userId: number, userCreatedAt?: Date) {
   const db = await getDb();
   if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
-  const now = new Date();
-
-  // 21-day free trial based on account creation date
-  if (userCreatedAt) {
-    const trialEnd = new Date(userCreatedAt.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-    if (now < trialEnd) return db; // still in trial — allow access
-  }
-
-  const profiles = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1);
-  const profile = profiles[0];
-  const isPaidPremium = profile?.isPremium && (!profile.premiumExpiresAt || profile.premiumExpiresAt > now);
-  if (!isPaidPremium) throw new TRPCError({ code: "FORBIDDEN", message: "Premium required" });
+  const access = await getPremiumAccess(db, userId, userCreatedAt ?? new Date(0));
+  if (!access.isPremium) throw new TRPCError({ code: "FORBIDDEN", message: "Premium required" });
   return db;
 }
 
@@ -243,21 +232,14 @@ export const recoveryRouter = router({
   /* ─── Check premium status ─── */
   checkPremium: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
-    const now = new Date();
-    // 21-day free trial based on account creation date
-    const accountCreatedAt = ctx.user.createdAt;
-    const trialEndDate = new Date(accountCreatedAt.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-    const isInTrial = now < trialEndDate;
-    const trialDaysLeft = isInTrial
-      ? Math.ceil((trialEndDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000))
-      : 0;
-
-    if (!db) return { isPremium: isInTrial, trialDaysLeft, isInTrial, isPaidPremium: false };
-
-    const profiles = await db.select().from(userProfiles).where(eq(userProfiles.userId, ctx.user.id)).limit(1);
-    const profile = profiles[0];
-    const isPaidPremium = !!(profile?.isPremium && (!profile.premiumExpiresAt || profile.premiumExpiresAt > now));
-    const isPremium = isPaidPremium || isInTrial;
-    return { isPremium, trialDaysLeft, isInTrial, isPaidPremium };
+    if (!db) return { isPremium: false, trialDaysLeft: 0, isInTrial: false, isPaidPremium: false, trialExpiresAt: null };
+    const access = await getPremiumAccess(db, ctx.user.id, ctx.user.createdAt);
+    return {
+      isPremium: access.isPremium,
+      trialDaysLeft: access.trialDaysLeft,
+      isInTrial: access.isInTrial,
+      isPaidPremium: access.isPaidPremium,
+      trialExpiresAt: access.trialExpiresAt,
+    };
   }),
 });

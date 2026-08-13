@@ -107,7 +107,10 @@ function PageTransition({ children, locationKey }: { children: React.ReactNode; 
     <div
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(16px)",
+        // A transform, including translateY(0), establishes a containing block
+        // for fixed descendants. Remove it once visible so workout dialogs and
+        // other fixed overlays use the viewport rather than this content wrapper.
+        transform: visible ? undefined : "translateY(16px)",
         transition: "opacity 0.3s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >

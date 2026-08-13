@@ -6,6 +6,7 @@ import {
   Users, Star, Type, Palette, Heart, Sparkles, Shield, Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
 const PLANS = [
@@ -73,10 +74,29 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function Premium() {
   const [, navigate] = useLocation();
   const [selectedPlan, setSelectedPlan] = useState("yearly");
+  const utils = trpc.useUtils();
+  const { data: premiumStatus, isLoading: premiumLoading } = trpc.recovery.checkPremium.useQuery();
+  const startTrial = trpc.profile.startTrial.useMutation({
+    onSuccess: (result) => {
+      utils.recovery.checkPremium.invalidate();
+      utils.profile.get.invalidate();
+      if (result.reason === "already_premium") {
+        toast.success("Your VYRO Pro membership is already active.");
+      } else if (result.reason === "already_active") {
+        toast.success("Your 21-day free trial is already active.");
+      } else if (result.reason === "already_used") {
+        toast.error("This account has already used its free trial.");
+        return;
+      } else {
+        toast.success("21-day free trial started! Welcome to VYRO Pro 👑", { duration: 4000 });
+      }
+      setTimeout(() => navigate("/dashboard"), 700);
+    },
+    onError: () => toast.error("We couldn't start your free trial. Please try again."),
+  });
 
   const handleSubscribe = () => {
-    toast.success("21-day free trial started! Welcome to VYRO Pro 👑", { duration: 4000 });
-    setTimeout(() => navigate("/dashboard"), 1500);
+    startTrial.mutate();
   };
 
   const selectedPlanData = PLANS.find((p) => p.id === selectedPlan);
@@ -109,7 +129,9 @@ export default function Premium() {
             {/* 21-day trial badge */}
             <div className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-sm font-bold">
               <Zap size={14} />
-              21-Day Free Trial — No Credit Card Required
+              {premiumStatus?.isInTrial
+                ? `${premiumStatus.trialDaysLeft} Trial Day${premiumStatus.trialDaysLeft === 1 ? "" : "s"} Remaining`
+                : "21-Day Free Trial — No Credit Card Required"}
             </div>
           </div>
         </div>
@@ -216,9 +238,16 @@ export default function Premium() {
         <Button
           className="w-full h-14 rounded-2xl font-bold text-base glow-primary mb-3"
           onClick={handleSubscribe}
+          disabled={premiumLoading || startTrial.isPending || premiumStatus?.isPremium}
         >
           <Crown size={18} className="mr-2 text-yellow-400" />
-          Start 21-Day Free Trial
+          {startTrial.isPending
+            ? "Starting Trial..."
+            : premiumStatus?.isPaidPremium
+              ? "Premium Active"
+              : premiumStatus?.isInTrial
+                ? "Free Trial Active"
+                : "Start 21-Day Free Trial"}
         </Button>
         <p className="text-center text-xs text-muted-foreground mb-2">
           Then {selectedPlanData?.price}{selectedPlanData?.period} · Cancel anytime

@@ -561,7 +561,6 @@ function ActiveSession({
   const [restActive, setRestActive] = useState(false);
   const [rating, setRating] = useState(4);
   const [showFinishModal, setShowFinishModal] = useState(false);
-  const [showCancelModal, setShowCancelModal] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameDraft, setNameDraft] = useState(name);
   const [showFinishConfetti, setShowFinishConfetti] = useState(false);
@@ -576,9 +575,9 @@ function ActiveSession({
       setTimeout(() => setXpGain({ visible: false, amount: 0 }), 1200);
       toast.success(`Workout complete! +${data.xpEarned} XP 🎉`);
       checkAndEmitLevelUp(data);
-      setTimeout(() => onFinish(), 1500);
+      onFinish();
     },
-    onError: () => toast.error("Failed to save workout"),
+    onError: (error) => toast.error(error.message || "Failed to save workout"),
   });
 
   // Elapsed timer
@@ -637,12 +636,6 @@ function ActiveSession({
   };
 
   const handleFinishWorkout = () => {
-    if (!canFinishActiveWorkout(exercises)) {
-      toast.error("Complete at least one set before finishing, or cancel this workout.");
-      setShowFinishModal(false);
-      return;
-    }
-
     const exerciseData = completedExercisePayload(exercises);
 
     logSession.mutate({
@@ -664,7 +657,13 @@ function ActiveSession({
 
       {/* Header */}
       <div className="px-4 pt-12 pb-3 flex items-center justify-between border-b border-border bg-background">
-        <button onClick={() => setShowCancelModal(true)} className="flex items-center gap-1 text-muted-foreground">
+        <button
+          onClick={() => {
+            onCancel();
+            toast("Workout cancelled");
+          }}
+          className="flex items-center gap-1 text-muted-foreground"
+        >
           <ArrowLeft size={18} />
           <span className="text-sm">Cancel</span>
         </button>
@@ -836,31 +835,6 @@ function ActiveSession({
                 <><Trophy size={18} className="mr-2" />Complete Workout</>
               )}
             </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Cancel confirmation */}
-      {showCancelModal && (
-        <div className="fixed inset-0 z-[60] bg-black/60 flex items-end justify-center">
-          <div className="bg-card w-full max-w-[430px] rounded-t-3xl p-6 space-y-5 animate-slide-up">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-display font-bold text-foreground">Cancel workout?</h3>
-              <button onClick={() => setShowCancelModal(false)} className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center" aria-label="Keep workout">
-                <X size={16} />
-              </button>
-            </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              This will discard your in-progress exercises and sets. This action cannot be undone.
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" className="h-12 rounded-xl" onClick={() => setShowCancelModal(false)}>
-                Keep Workout
-              </Button>
-              <Button className="h-12 rounded-xl bg-red-500 text-white hover:bg-red-600" onClick={() => { onCancel(); toast("Workout cancelled"); }}>
-                Discard Workout
-              </Button>
-            </div>
           </div>
         </div>
       )}

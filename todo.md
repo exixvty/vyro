@@ -378,3 +378,13 @@
 - [x] Verify the global CSS import warning is resolved in the production build log
 - [x] Run the full Vitest suite after lazy loading changes
 - [x] Document before/after initial bundle results and affected routes (page routes lazy-load; initial entry is 62.9 kB, with cacheable vendor chunks)
+
+## Phase 41: Release-Blocking Reliability Audit
+- [x] Reproduce and trace the active-workout finish failure (completion could be blocked by non-critical side-effect writes)
+- [x] Reproduce and trace the active-workout cancel failure (confirmation flow could leave users in the active overlay)
+- [x] Reproduce and trace the 21-day free-trial premium access failure (Premium CTA only displayed a toast and never persisted activation)
+- [x] Repair workout finish, cancel, and draft cleanup flows
+- [x] Repair trial eligibility and premium feature gating flows
+- [x] Audit all major programmes: onboarding, workouts, nutrition, progress, habits, library, gamification, social, profile, premium, recovery, notifications, referrals, and settings (19 programme smoke checks)
+- [x] Add regression tests for every repaired failure path (5 release-blocker tests)
+- [x] Run full browser and automated regression verification
