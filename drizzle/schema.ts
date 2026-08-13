@@ -449,8 +449,8 @@ export const themePreferences = mysqlTable("theme_preferences", {
   secondaryColor: varchar("secondaryColor", { length: 20 }).default("pink").notNull(),
   // Button style: solid, outline, gradient, glassmorphism
   buttonStyle: mysqlEnum("buttonStyle", ["solid", "outline", "gradient", "glassmorphism"]).default("solid").notNull(),
-  // Font: inter, space-grotesk, syne, poppins, roboto
-  fontFamily: mysqlEnum("fontFamily", ["inter", "space-grotesk", "syne", "poppins", "roboto"]).default("inter").notNull(),
+  // Premium font catalogue: expressive display and highly readable body choices.
+  fontFamily: mysqlEnum("fontFamily", ["inter", "space-grotesk", "syne", "poppins", "roboto", "outfit", "manrope", "dm-sans", "plus-jakarta-sans", "sora"]).default("inter").notNull(),
   // Branding
   appName: varchar("appName", { length: 100 }).default("VYRO").notNull(),
   logoUrl: text("logoUrl"),

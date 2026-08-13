@@ -1,0 +1,1 @@
+ALTER TABLE `theme_preferences` MODIFY COLUMN `fontFamily` enum('inter','space-grotesk','syne','poppins','roboto','outfit','manrope','dm-sans','plus-jakarta-sans','sora') NOT NULL DEFAULT 'inter';

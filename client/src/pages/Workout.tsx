@@ -783,9 +783,9 @@ function ActiveSession({
 
       {/* Finish Modal */}
       {showFinishModal && (
-        <div className="fixed inset-0 z-[60] bg-black/60 flex items-end justify-center">
-          <div className="relative bg-card w-full max-w-[430px] rounded-t-3xl p-6 space-y-5 animate-slide-up">
-            <ConfettiEffect active={showFinishConfetti} count={40} className="rounded-t-3xl" />
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-5">
+          <div className="relative bg-card w-full max-w-sm rounded-3xl p-6 space-y-5 animate-slide-up">
+            <ConfettiEffect active={showFinishConfetti} count={40} className="rounded-3xl" />
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-display font-bold text-foreground">Finish Workout?</h3>
               <button onClick={() => setShowFinishModal(false)} className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
@@ -827,7 +827,7 @@ function ActiveSession({
             <Button
               onClick={handleFinishWorkout}
               disabled={logSession.isPending}
-              className="w-full h-14 rounded-2xl font-semibold text-base bg-green-600 hover:bg-green-700"
+              className="w-full max-w-xs mx-auto h-14 rounded-2xl font-semibold text-base bg-green-600 hover:bg-green-700"
             >
               {logSession.isPending ? (
                 <><Loader2 size={18} className="mr-2 animate-spin" />Saving...</>

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { useTheme, PRESET_THEMES, COLOR_MAP, FONT_MAP } from "@/contexts/ThemeContext";
+import { useTheme, PRESET_THEMES, COLOR_MAP, FONT_MAP, type ThemeCustomization } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Palette, Type, Zap, Upload, Save, Loader2, Flame, Crown, Lock } from "lucide-react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 
 const COLORS = Object.keys(COLOR_MAP);
-const FONTS = Object.keys(FONT_MAP) as Array<keyof typeof FONT_MAP>;
+const FONTS = Object.keys(FONT_MAP) as ThemeCustomization["fontFamily"][];
 const BUTTON_STYLES = ["solid", "outline", "gradient", "glassmorphism"] as const;
 
 export default function Appearance() {
@@ -27,9 +27,38 @@ export default function Appearance() {
     setLocal(customization);
   }, [customization]);
 
+  useEffect(() => {
+    if (!savedTheme) return;
+
+    const persisted: ThemeCustomization = {
+      ...local,
+      primaryColor: savedTheme.primaryColor,
+      accentColor: savedTheme.accentColor,
+      secondaryColor: savedTheme.secondaryColor,
+      buttonStyle: savedTheme.buttonStyle,
+      fontFamily: savedTheme.fontFamily,
+      appName: savedTheme.appName,
+      logoUrl: savedTheme.logoUrl ?? undefined,
+      presetTheme: savedTheme.presetTheme,
+    };
+
+    setLocal(persisted);
+    setCustomization(persisted);
+    // Persisted account preferences should win when Appearance is opened.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedTheme]);
+
   const handleColorChange = (key: "primaryColor" | "accentColor" | "secondaryColor", value: string) => {
     const updated = { ...local, [key]: value };
     setLocal(updated);
+    setCustomization(updated);
+  };
+
+  const handlePremiumAppearanceChange = (updates: Partial<typeof local>) => {
+    const updated = { ...local, ...updates };
+    setLocal(updated);
+    // Premium controls preview immediately and remain available after a refresh.
+    // The explicit Save action persists the same choices to the account profile.
     setCustomization(updated);
   };
 
@@ -172,7 +201,7 @@ export default function Appearance() {
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {FONTS.map((font) => (
-              <button key={font} onClick={() => setLocal({ ...local, fontFamily: font as any })}
+              <button key={font} onClick={() => handlePremiumAppearanceChange({ fontFamily: font })}
                 className={`p-3 rounded-lg border-2 transition-all ${
                   local.fontFamily === font ? "border-primary bg-primary/10" : "border-border bg-card"
                 }`}
@@ -211,7 +240,7 @@ export default function Appearance() {
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {BUTTON_STYLES.map((style) => (
-              <button key={style} onClick={() => setLocal({ ...local, buttonStyle: style })}
+              <button key={style} onClick={() => handlePremiumAppearanceChange({ buttonStyle: style })}
                 className={`p-3 rounded-lg border-2 transition-all ${
                   local.buttonStyle === style ? "border-primary bg-primary/10" : "border-border bg-card"
                 }`}>

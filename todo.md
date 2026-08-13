@@ -388,3 +388,10 @@
 - [x] Audit all major programmes: onboarding, workouts, nutrition, progress, habits, library, gamification, social, profile, premium, recovery, notifications, referrals, and settings (19 programme smoke checks)
 - [x] Add regression tests for every repaired failure path (5 release-blocker tests)
 - [x] Run full browser and automated regression verification
+
+## Phase 42: Premium Appearance Controls and Workout Completion Layout
+- [x] Audit Premium font selection, button-style controls, and saved preference application
+- [x] Add additional Premium-only font choices to Appearance
+- [x] Verify Premium font and button-style changes persist and apply across the app
+- [x] Center the active-workout completion action in the Finish Workout panel
+- [x] Add regression tests and run browser, TypeScript, and production-build verification
