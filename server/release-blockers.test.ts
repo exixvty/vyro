@@ -17,11 +17,11 @@ function premiumDb(profile: Record<string, unknown> | null) {
 
 describe("release-blocking reliability", () => {
   it("gives an explicitly activated trial twenty-one days of premium access", async () => {
-    const startedAt = new Date();
+    const startedAt = new Date("2026-01-01T00:00:00Z");
     const access = await getPremiumAccess(
       premiumDb({ isPremium: false, premiumExpiresAt: null, trialStartedAt: startedAt, trialExpiresAt: getTrialEndDate(startedAt) }),
       42,
-      new Date("2020-01-01")
+      startedAt
     );
 
     expect(access.isPremium).toBe(true);
@@ -34,11 +34,11 @@ describe("release-blocking reliability", () => {
       premiumDb({
         isPremium: false,
         premiumExpiresAt: null,
-        trialStartedAt: new Date("2025-01-01"),
-        trialExpiresAt: new Date("2025-01-22"),
+        trialStartedAt: new Date("2025-01-01T00:00:00Z"),
+        trialExpiresAt: new Date("2025-01-22T00:00:00Z"),
       }),
       42,
-      new Date("2020-01-01")
+      new Date("2025-02-01T00:00:00Z")
     );
 
     expect(access.isPremium).toBe(false);
@@ -50,12 +50,12 @@ describe("release-blocking reliability", () => {
     const access = await getPremiumAccess(
       premiumDb({
         isPremium: true,
-        premiumExpiresAt: new Date(Date.now() + 86_400_000),
-        trialStartedAt: new Date("2025-01-01"),
-        trialExpiresAt: new Date("2025-01-22"),
+        premiumExpiresAt: new Date("2025-03-01T00:00:00Z"),
+        trialStartedAt: new Date("2025-01-01T00:00:00Z"),
+        trialExpiresAt: new Date("2025-01-22T00:00:00Z"),
       }),
       42,
-      new Date("2020-01-01")
+      new Date("2025-02-01T00:00:00Z")
     );
 
     expect(access.isPremium).toBe(true);

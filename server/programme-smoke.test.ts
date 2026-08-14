@@ -44,7 +44,7 @@ describe("major programme smoke audit", () => {
   it("connects the Premium CTA to a persisted trial mutation", () => {
     const premiumSource = readFileSync(resolve(project, "client/src/pages/Premium.tsx"), "utf8");
     expect(premiumSource).toContain("trpc.profile.startTrial.useMutation");
-    expect(premiumSource).toContain("startTrial.mutate()");
+    expect(premiumSource).toContain("startTrial.mutateAsync()");
     expect(routerSource).toContain("startTrial: protectedProcedure");
   });
 });

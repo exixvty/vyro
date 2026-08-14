@@ -83,6 +83,6 @@ describe("trial-status presentation and gates", () => {
     expect(routers).toContain("getPremiumStatus: protectedProcedure.query");
     expect(routers).toContain("currentProfile?.trialStartedAt");
     expect(recovery).toContain("import { getPremiumAccess } from \"../premiumAccess\"");
-    expect(recovery).toContain("return getPremiumAccess(db, ctx.user.id)");
+    expect(recovery).toContain("const access = await getPremiumAccess(db, ctx.user.id);");
   });
 });
