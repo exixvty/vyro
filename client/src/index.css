@@ -185,11 +185,11 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--vyro-font-family, 'Inter', system-ui, sans-serif);
     overscroll-behavior: none;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Syne', 'Space Grotesk', system-ui, sans-serif;
+    font-family: var(--vyro-font-family, 'Syne', 'Space Grotesk', system-ui, sans-serif);
     @apply font-bold tracking-tight;
   }
   button:not(:disabled),
@@ -207,7 +207,7 @@
 
 /* ── Utility Classes ─────────────────────────────────────────────────────── */
 @layer utilities {
-  .font-display { font-family: 'Syne', 'Space Grotesk', system-ui, sans-serif; }
+  .font-display { font-family: var(--vyro-font-family, 'Syne', 'Space Grotesk', system-ui, sans-serif); }
 
   /* Glass morphism */
   .glass {
@@ -298,6 +298,34 @@
     border-radius: var(--radius-xl);
     box-shadow: 0 0 20px var(--vyro-glow), inset 0 1px 0 oklch(1 0 0 / 0.05);
   }
+}
+
+/* ── Premium Button Styles ────────────────────────────────────────────────── */
+[data-button-style="solid"] .vyro-button {
+  box-shadow: 0 8px 22px var(--vyro-glow);
+}
+
+[data-button-style="outline"] .vyro-button {
+  background: transparent !important;
+  color: var(--primary) !important;
+  border: 1px solid var(--primary) !important;
+  box-shadow: none !important;
+}
+
+[data-button-style="gradient"] .vyro-button {
+  background: var(--grad-primary) !important;
+  color: var(--primary-foreground) !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 26px var(--vyro-glow);
+}
+
+[data-button-style="glassmorphism"] .vyro-button {
+  background: color-mix(in oklch, var(--primary) 18%, var(--card)) !important;
+  color: var(--foreground) !important;
+  border: 1px solid color-mix(in oklch, var(--primary) 55%, transparent) !important;
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--primary) 20%, transparent);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
 }
 
 /* ── Animations ──────────────────────────────────────────────────────────── */

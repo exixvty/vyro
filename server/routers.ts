@@ -245,36 +245,41 @@ Return a JSON object with this exact structure:
         ...input,
       });
 
-      // Update game stats
       const xpEarned = Math.floor(input.durationMinutes * 2);
-      await awardXP(db, ctx.user.id, xpEarned, "Completed workout");
 
-      // Update stats
-      await db
-        .insert(userGameStats)
-        .values({
+      // The completed session is the source of truth. Engagement side effects must
+      // never trap an athlete in an active workout if an auxiliary write is delayed.
+      const sideEffects = await Promise.allSettled([
+        awardXPWithLevelUp(db, ctx.user.id, xpEarned, "Completed workout"),
+        db
+          .insert(userGameStats)
+          .values({
+            userId: ctx.user.id,
+            totalWorkouts: 1,
+            totalMinutes: input.durationMinutes,
+            workoutStreak: 1,
+          })
+          .onDuplicateKeyUpdate({
+            set: {
+              totalWorkouts: sql`totalWorkouts + 1`,
+              totalMinutes: sql`totalMinutes + ${input.durationMinutes}`,
+            },
+          }),
+        db.insert(activityFeed).values({
           userId: ctx.user.id,
-          totalWorkouts: 1,
-          totalMinutes: input.durationMinutes,
-          workoutStreak: 1,
-        })
-        .onDuplicateKeyUpdate({
-          set: {
-            totalWorkouts: sql`totalWorkouts + 1`,
-            totalMinutes: sql`totalMinutes + ${input.durationMinutes}`,
-          },
-        });
+          type: "workout_completed",
+          title: `Completed "${input.title}"`,
+          description: `${input.durationMinutes} minutes · ${input.caloriesBurned || 0} calories burned`,
+          metadata: { type: input.type, duration: input.durationMinutes },
+        }),
+      ]);
 
-      // Add to activity feed
-      await db.insert(activityFeed).values({
-        userId: ctx.user.id,
-        type: "workout_completed",
-        title: `Completed "${input.title}"`,
-        description: `${input.durationMinutes} minutes · ${input.caloriesBurned || 0} calories burned`,
-        metadata: { type: input.type, duration: input.durationMinutes },
-      });
+      const levelUp = sideEffects[0].status === "fulfilled" ? sideEffects[0].value : undefined;
+      if (sideEffects.some((result) => result.status === "rejected")) {
+        console.error("Workout completion side effect failed", sideEffects);
+      }
 
-      return { success: true, xpEarned };
+      return { success: true, xpEarned, ...levelUp };
     }),
 
   getSessions: protectedProcedure

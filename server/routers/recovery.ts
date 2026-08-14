@@ -4,8 +4,8 @@ import { getDb } from "../db";
 import { userAddictions, urgeLog, recoveryMotivations, notificationSettings } from "../../drizzle/schema";
 import { eq, and, desc, like } from "drizzle-orm";
 import { buildCravingAlertNotification } from "../recoveryNotifications";
-import { TRPCError } from "@trpc/server";
 import { getPremiumAccess } from "../premiumAccess";
+import { TRPCError } from "@trpc/server";
 
 /* ─── Premium Guard ──────────────────────────────────────────────────────── */
 async function requirePremium(userId: number, _legacyUserCreatedAt?: Date) {
@@ -232,6 +232,15 @@ export const recoveryRouter = router({
   /* ─── Check premium status ─── */
   checkPremium: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
-    return getPremiumAccess(db, ctx.user.id);
+    const access = await getPremiumAccess(db, ctx.user.id);
+    return {
+      isPremium: access.isPremium,
+      trialDaysLeft: access.trialDaysLeft,
+      isInTrial: access.isInTrial,
+      isPaidPremium: access.isPaidPremium,
+      hasUsedTrial: access.hasUsedTrial,
+      trialStartedAt: access.trialStartedAt,
+      trialExpiresAt: access.trialExpiresAt,
+    };
   }),
 });

@@ -27,7 +27,7 @@ export const themeRouter = router({
         accentColor: z.string().optional(),
         secondaryColor: z.string().optional(),
         buttonStyle: z.enum(["solid", "outline", "gradient", "glassmorphism"]).optional(),
-        fontFamily: z.enum(["inter", "space-grotesk", "syne", "poppins", "roboto"]).optional(),
+        fontFamily: z.enum(["inter", "space-grotesk", "syne", "poppins", "roboto", "outfit", "manrope", "dm-sans", "plus-jakarta-sans", "sora"]).optional(),
         appName: z.string().optional(),
         logoUrl: z.string().optional(),
         presetTheme: z.enum(["custom", "neon", "sunset", "ocean", "forest", "cyberpunk"]).optional(),

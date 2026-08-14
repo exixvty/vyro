@@ -1,9 +1,11 @@
 import { eq } from "drizzle-orm";
+import type { getDb } from "./db";
 import { userProfiles, type UserProfile } from "../drizzle/schema";
 
 export const TRIAL_DURATION_DAYS = 21;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
+type Database = NonNullable<Awaited<ReturnType<typeof getDb>>>;
 type PremiumProfile = Pick<
   UserProfile,
   "isPremium" | "premiumExpiresAt" | "trialStartedAt" | "trialExpiresAt"
@@ -34,18 +36,15 @@ export function calculatePremiumAccess(profile: PremiumProfile | null | undefine
   };
 }
 
-export async function getPremiumAccess(
-  db: { select: Function } | null,
-  userId: number,
-  now = new Date()
-) {
-  if (!db) return calculatePremiumAccess(null, now);
+export async function getPremiumAccess(db: Database | null | undefined, userId: number, now = new Date()) {
+  if (!db) return { profile: null, ...calculatePremiumAccess(null, now) };
 
   const profiles = await db
     .select()
     .from(userProfiles)
     .where(eq(userProfiles.userId, userId))
     .limit(1);
+  const profile = profiles[0] ?? null;
 
-  return calculatePremiumAccess(profiles[0] ?? null, now);
+  return { profile, ...calculatePremiumAccess(profile, now) };
 }

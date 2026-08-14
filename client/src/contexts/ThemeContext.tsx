@@ -7,7 +7,7 @@ export interface ThemeCustomization {
   accentColor: string;
   secondaryColor: string;
   buttonStyle: "solid" | "outline" | "gradient" | "glassmorphism";
-  fontFamily: "inter" | "space-grotesk" | "syne" | "poppins" | "roboto";
+  fontFamily: "inter" | "space-grotesk" | "syne" | "poppins" | "roboto" | "outfit" | "manrope" | "dm-sans" | "plus-jakarta-sans" | "sora";
   appName: string;
   logoUrl?: string;
   presetTheme: "custom" | "neon" | "sunset" | "ocean" | "forest" | "cyberpunk";
@@ -67,6 +67,11 @@ export const FONT_MAP: Record<string, string> = {
   syne: "'Syne', system-ui, sans-serif",
   poppins: "'Poppins', system-ui, sans-serif",
   roboto: "'Roboto', system-ui, sans-serif",
+  outfit: "'Outfit', system-ui, sans-serif",
+  manrope: "'Manrope', system-ui, sans-serif",
+  "dm-sans": "'DM Sans', system-ui, sans-serif",
+  "plus-jakarta-sans": "'Plus Jakarta Sans', system-ui, sans-serif",
+  sora: "'Sora', system-ui, sans-serif",
 };
 
 interface ThemeContextType {
@@ -139,10 +144,13 @@ export function ThemeProvider({
     // Set data-accent attribute to apply all color CSS variables at once
     root.setAttribute("data-accent", custom.primaryColor);
 
-    // Apply font family to body
-    body.style.fontFamily = FONT_MAP[custom.fontFamily] || FONT_MAP.inter;
+    // Apply typography consistently to body text and display headings.
+    const fontFamily = FONT_MAP[custom.fontFamily] || FONT_MAP.inter;
+    body.style.fontFamily = fontFamily;
+    root.style.setProperty("--vyro-font-family", fontFamily);
 
-    // Store button style for component usage
+    // Store the selected button treatment for shared Button components.
+    root.setAttribute("data-button-style", custom.buttonStyle);
     root.style.setProperty("--button-style", custom.buttonStyle);
 
     // Beast Mode: apply body glow class
