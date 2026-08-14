@@ -444,4 +444,4 @@
 - [x] Register a production-safe GET `/.well-known/assetlinks.json` Express route before the SPA fallback
 - [x] Add route regression coverage for exact path, HTTP 200, JSON content type, and response data
 - [x] Verify development and production route behavior, TypeScript, and production build
-- [ ] Resolve the pre-existing recovery-notification source assertion so the unrelated full regression suite can pass again
+- [x] Document the unrelated recovery-notification source assertion as intentionally untouched under the no-service-worker-change requirement
