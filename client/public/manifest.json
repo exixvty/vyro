@@ -8,56 +8,35 @@
   "orientation": "portrait-primary",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "categories": ["fitness", "health", "lifestyle"],
-  "screenshots": [
-    {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-512-AiLRTCDdqKa8yYX8t3oJnx.webp",
-      "sizes": "512x512",
-      "type": "image/webp",
-      "form_factor": "wide"
-    },
-    {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-5TefzRNuutfjqrMwecVatk.webp",
-      "sizes": "192x192",
-      "type": "image/webp",
-      "form_factor": "narrow"
-    }
+  "lang": "en",
+  "categories": [
+    "fitness",
+    "health",
+    "lifestyle"
   ],
   "icons": [
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-5TefzRNuutfjqrMwecVatk.webp",
-      "sizes": "192x192",
-      "type": "image/webp",
-      "purpose": "any"
-    },
-    {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-AG4JQNLUTWgktcDLoCtN64.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-512-AiLRTCDdqKa8yYX8t3oJnx.webp",
-      "sizes": "512x512",
-      "type": "image/webp",
-      "purpose": "any"
-    },
-    {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-512-aKfTUF23eKPEugESM2rTUQ.png",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-5TefzRNuutfjqrMwecVatk.webp",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/webp",
+      "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-512-AiLRTCDdqKa8yYX8t3oJnx.webp",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/webp",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ],
@@ -69,9 +48,9 @@
       "url": "/workout",
       "icons": [
         {
-          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-5TefzRNuutfjqrMwecVatk.webp",
+          "src": "/icons/icon-192.png",
           "sizes": "192x192",
-          "type": "image/webp"
+          "type": "image/png"
         }
       ]
     },
@@ -82,9 +61,9 @@
       "url": "/nutrition",
       "icons": [
         {
-          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663464335932/ABaDZShuwigi7srSSPoYho/vyro-icon-192-5TefzRNuutfjqrMwecVatk.webp",
+          "src": "/icons/icon-192.png",
           "sizes": "192x192",
-          "type": "image/webp"
+          "type": "image/png"
         }
       ]
     }

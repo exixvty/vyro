@@ -7,6 +7,8 @@ const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
 ];
 
 // Install event - cache essential files
@@ -148,8 +150,8 @@ self.addEventListener('push', (event) => {
   let data = {
     title: 'VYRO',
     body: 'Time to crush your goals! 🔥',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
+  icon: '/icons/icon-192.png',
+badge: '/icons/icon-192.png',
     tag: 'vyro-notification',
     data: {},
   };

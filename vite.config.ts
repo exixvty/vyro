@@ -1,7 +1,6 @@
 import { jsxLocPlugin } from "@builder.io/vite-plugin-jsx-loc";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { VitePWA } from "vite-plugin-pwa";
 import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
@@ -157,30 +156,6 @@ const plugins = [
   jsxLocPlugin(),
   vitePluginManusRuntime(),
   vitePluginManusDebugCollector(),
-  VitePWA({
-    registerType: "autoUpdate",
-    manifest: {
-      name: "VYRO",
-      short_name: "VYRO",
-      description: "Your all-in-one fitness and athlete tracking app",
-      theme_color: "#000000",
-      background_color: "#000000",
-      display: "standalone",
-      start_url: "/",
-      icons: [
-        {
-          src: "/icons/icon-192.png",
-          sizes: "192x192",
-          type: "image/png",
-        },
-        {
-          src: "/icons/icon-512.png",
-          sizes: "512x512",
-          type: "image/png",
-        },
-      ],
-    },
-  }),
 ];
 
 export default defineConfig({
