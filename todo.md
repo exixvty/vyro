@@ -420,3 +420,7 @@
 - [x] Support showcasing eligible achievements and PRs from the selected workout
 - [x] Add public, friends-only, and only-me audiences and enforce visibility server-side
 - [x] Add regression tests and verify each sharing audience and visibility behavior live
+
+## Phase 47: Official Deployment Visibility
+- [x] Compare the official VYRO domain with the latest saved release
+- [x] Confirm the publishing action required for the current checkpoint
