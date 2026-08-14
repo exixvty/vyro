@@ -378,3 +378,10 @@
 - [x] Verify the global CSS import warning is resolved in the production build log
 - [x] Run the full Vitest suite after lazy loading changes
 - [x] Document before/after initial bundle results and affected routes (page routes lazy-load; initial entry is 62.9 kB, with cacheable vendor chunks)
+
+## Phase 43: Durable Free-Trial Premium Access
+- [x] Trace why a user who activates the 21-day trial can still see Start 21-Day Free Trial and locked Premium features
+- [x] Persist and read a single durable trial status for the authenticated account
+- [x] Prevent repeat trial activation and show active trial state on Premium
+- [x] Verify Recovery and Appearance Premium gates unlock immediately after activation
+- [x] Add regression tests and complete live browser, TypeScript, and production-build verification

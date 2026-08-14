@@ -12,6 +12,7 @@ import { engagementRouter } from "./routers/engagement";
 import { themeRouter } from "./routers/theme";
 import { notificationsRouter } from "./routers/notifications";
 import { recoveryRouter } from "./routers/recovery";
+import { calculatePremiumAccess, getPremiumAccess, getTrialEndDate } from "./premiumAccess";
 
 import {
   userProfiles,
@@ -47,6 +48,54 @@ const profileRouter = router({
       .where(eq(userProfiles.userId, ctx.user.id))
       .limit(1);
     return result[0] ?? null;
+  }),
+
+  getPremiumStatus: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    return getPremiumAccess(db, ctx.user.id);
+  }),
+
+  startTrial: protectedProcedure.mutation(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new Error("DB unavailable");
+
+    const existing = await db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, ctx.user.id))
+      .limit(1);
+    const currentProfile = existing[0] ?? null;
+
+    // The timestamp is intentionally immutable: a second click returns the
+    // current status rather than silently extending or restarting a trial.
+    if (currentProfile?.trialStartedAt) {
+      return { ...calculatePremiumAccess(currentProfile), started: false };
+    }
+
+    const trialStartedAt = new Date();
+    const trialExpiresAt = getTrialEndDate(trialStartedAt);
+    if (currentProfile) {
+      await db
+        .update(userProfiles)
+        .set({ trialStartedAt, trialExpiresAt })
+        .where(eq(userProfiles.userId, ctx.user.id));
+    } else {
+      await db.insert(userProfiles).values({
+        userId: ctx.user.id,
+        trialStartedAt,
+        trialExpiresAt,
+      });
+    }
+
+    return {
+      ...calculatePremiumAccess({
+        isPremium: false,
+        premiumExpiresAt: null,
+        trialStartedAt,
+        trialExpiresAt,
+      }),
+      started: true,
+    };
   }),
 
   upsert: protectedProcedure

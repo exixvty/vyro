@@ -6,6 +6,7 @@ import {
   Users, Star, Type, Palette, Heart, Sparkles, Shield, Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
 const PLANS = [
@@ -73,10 +74,29 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function Premium() {
   const [, navigate] = useLocation();
   const [selectedPlan, setSelectedPlan] = useState("yearly");
+  const utils = trpc.useUtils();
+  const { data: premiumStatus, isLoading: isCheckingStatus } = trpc.profile.getPremiumStatus.useQuery();
+  const startTrial = trpc.profile.startTrial.useMutation();
 
-  const handleSubscribe = () => {
-    toast.success("21-day free trial started! Welcome to VYRO Pro 👑", { duration: 4000 });
-    setTimeout(() => navigate("/dashboard"), 1500);
+  const handleSubscribe = async () => {
+    try {
+      const result = await startTrial.mutateAsync();
+      await Promise.all([
+        utils.profile.getPremiumStatus.invalidate(),
+        utils.profile.get.invalidate(),
+        utils.recovery.checkPremium.invalidate(),
+      ]);
+
+      if (result.started) {
+        toast.success("Your 21-day VYRO Pro trial is active!", { duration: 4000 });
+      } else if (result.isInTrial) {
+        toast("Your VYRO Pro trial is already active.");
+      } else {
+        toast("Your free trial has already been used.");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to start your free trial");
+    }
   };
 
   const selectedPlanData = PLANS.find((p) => p.id === selectedPlan);
@@ -109,7 +129,11 @@ export default function Premium() {
             {/* 21-day trial badge */}
             <div className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-sm font-bold">
               <Zap size={14} />
-              21-Day Free Trial — No Credit Card Required
+              {premiumStatus?.isInTrial
+                ? `${premiumStatus.trialDaysLeft} Day${premiumStatus.trialDaysLeft === 1 ? "" : "s"} Left in Your Free Trial`
+                : premiumStatus?.isPaidPremium
+                  ? "VYRO Pro Active"
+                  : "21-Day Free Trial — No Credit Card Required"}
             </div>
           </div>
         </div>
@@ -213,13 +237,34 @@ export default function Premium() {
 
       {/* CTA */}
       <div className="px-5">
-        <Button
-          className="w-full h-14 rounded-2xl font-bold text-base glow-primary mb-3"
-          onClick={handleSubscribe}
-        >
-          <Crown size={18} className="mr-2 text-yellow-400" />
-          Start 21-Day Free Trial
-        </Button>
+        {premiumStatus?.isPremium ? (
+          <div className="w-full rounded-2xl border border-green-500/30 bg-green-500/10 px-5 py-4 text-center mb-3">
+            <div className="flex items-center justify-center gap-2 text-green-400 font-bold">
+              <Check size={18} />
+              {premiumStatus.isInTrial ? "VYRO Pro Trial Active" : "VYRO Pro Active"}
+            </div>
+            {premiumStatus.isInTrial && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {premiumStatus.trialDaysLeft} day{premiumStatus.trialDaysLeft === 1 ? "" : "s"} remaining. Premium features are unlocked now.
+              </p>
+            )}
+          </div>
+        ) : (
+          <Button
+            className="w-full h-14 rounded-2xl font-bold text-base glow-primary mb-3"
+            onClick={handleSubscribe}
+            disabled={isCheckingStatus || startTrial.isPending || premiumStatus?.hasUsedTrial}
+          >
+            <Crown size={18} className="mr-2 text-yellow-400" />
+            {isCheckingStatus
+              ? "Checking VYRO Pro status..."
+              : startTrial.isPending
+                ? "Activating Trial..."
+                : premiumStatus?.hasUsedTrial
+                  ? "21-Day Free Trial Used"
+                  : "Start 21-Day Free Trial"}
+          </Button>
+        )}
         <p className="text-center text-xs text-muted-foreground mb-2">
           Then {selectedPlanData?.price}{selectedPlanData?.period} · Cancel anytime
         </p>

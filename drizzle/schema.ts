@@ -46,6 +46,9 @@ export const userProfiles = mysqlTable("user_profiles", {
   onboardingCompleted: boolean("onboardingCompleted").default(false).notNull(),
   isPremium: boolean("isPremium").default(false).notNull(),
   premiumExpiresAt: timestamp("premiumExpiresAt"),
+  // A trial only exists after an authenticated user explicitly starts it.
+  trialStartedAt: timestamp("trialStartedAt"),
+  trialExpiresAt: timestamp("trialExpiresAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
