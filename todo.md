@@ -438,3 +438,10 @@
 - [x] Inspect the deployed well-known endpoint and current VYRO static routing without changing behavior
 - [x] Research supported Manus Space mechanisms for static dotfiles, explicit routing, and JSON content headers
 - [x] Determine whether any option can make the endpoint valid while leaving the current deployment unchanged
+
+## Phase 51: Digital Asset Links Endpoint
+- [x] Add a dedicated VYRO-controlled JSON configuration source for Digital Asset Links data
+- [x] Register a production-safe GET `/.well-known/assetlinks.json` Express route before the SPA fallback
+- [x] Add route regression coverage for exact path, HTTP 200, JSON content type, and response data
+- [x] Verify development and production route behavior, TypeScript, and production build
+- [ ] Resolve the pre-existing recovery-notification source assertion so the unrelated full regression suite can pass again

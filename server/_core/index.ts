@@ -8,6 +8,10 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { sendSobrietyRemindersHandler } from "./scheduled";
+import {
+  DIGITAL_ASSET_LINKS_PATH,
+  digitalAssetLinksHandler,
+} from "../config/digitalAssetLinks";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -46,6 +50,9 @@ async function startServer() {
       createContext,
     })
   );
+  // This must stay before Vite and production static middleware, both of which
+  // otherwise send the SPA document for unmatched dot-prefixed paths.
+  app.get(DIGITAL_ASSET_LINKS_PATH, digitalAssetLinksHandler);
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
