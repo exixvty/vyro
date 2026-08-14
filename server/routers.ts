@@ -13,6 +13,7 @@ import { themeRouter } from "./routers/theme";
 import { notificationsRouter } from "./routers/notifications";
 import { recoveryRouter } from "./routers/recovery";
 import { calculatePremiumAccess, getPremiumAccess, getTrialEndDate } from "./premiumAccess";
+import { storagePut } from "./storage";
 
 import {
   userProfiles,
@@ -123,6 +124,35 @@ const profileRouter = router({
         .values({ userId: ctx.user.id, ...input })
         .onDuplicateKeyUpdate({ set: input });
       return { success: true };
+    }),
+
+  uploadAvatar: protectedProcedure
+    .input(z.object({
+      imageBase64: z.string().min(1).max(7_000_000),
+      mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("DB unavailable");
+
+      const imageBytes = Buffer.from(input.imageBase64, "base64");
+      if (imageBytes.length === 0 || imageBytes.length > 5 * 1024 * 1024) {
+        throw new Error("Profile pictures must be an image up to 5 MB");
+      }
+
+      const extension = input.mimeType === "image/png" ? "png" : input.mimeType === "image/webp" ? "webp" : "jpg";
+      const { url } = await storagePut(
+        `avatars/${ctx.user.id}/avatar-${Date.now()}.${extension}`,
+        imageBytes,
+        input.mimeType
+      );
+
+      await db
+        .insert(userProfiles)
+        .values({ userId: ctx.user.id, avatarUrl: url })
+        .onDuplicateKeyUpdate({ set: { avatarUrl: url } });
+
+      return { avatarUrl: url };
     }),
 });
 
@@ -787,12 +817,56 @@ const socialRouter = router({
           createdAt: activityFeed.createdAt,
           userId: activityFeed.userId,
           userName: users.name,
+          avatarUrl: userProfiles.avatarUrl,
         })
         .from(activityFeed)
         .leftJoin(users, eq(activityFeed.userId, users.id))
+        .leftJoin(userProfiles, eq(activityFeed.userId, userProfiles.userId))
         .where(eq(activityFeed.isPublic, true))
         .orderBy(desc(activityFeed.createdAt))
         .limit(input.limit);
+    }),
+
+  createPost: protectedProcedure
+    .input(z.object({
+      content: z.string().trim().min(1).max(500),
+      sessionId: z.number().int().positive().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("DB unavailable");
+
+      let metadata: Record<string, unknown> | null = null;
+      let title = "Shared a training update";
+
+      if (input.sessionId) {
+        const sessions = await db
+          .select()
+          .from(workoutSessions)
+          .where(and(eq(workoutSessions.id, input.sessionId), eq(workoutSessions.userId, ctx.user.id)))
+          .limit(1);
+        const session = sessions[0];
+        if (!session) throw new Error("Workout session not found");
+
+        title = `Completed ${session.title}`;
+        metadata = {
+          workoutSessionId: session.id,
+          title: session.title,
+          durationMinutes: session.durationMinutes,
+          caloriesBurned: session.caloriesBurned,
+        };
+      }
+
+      const [result] = await db.insert(activityFeed).values({
+        userId: ctx.user.id,
+        type: "workout_completed",
+        title,
+        description: input.content,
+        metadata,
+        isPublic: true,
+      });
+
+      return { id: Number(result.insertId) };
     }),
 
   likeItem: protectedProcedure

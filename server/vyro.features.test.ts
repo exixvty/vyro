@@ -69,11 +69,12 @@ describe("VYRO App Router", () => {
     expect(clearedCookies.length).toBeGreaterThan(0);
   });
 
-  it("profile router has get and upsert procedures", () => {
+  it("profile router has get, upsert, and avatar upload procedures", () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
     expect(typeof caller.profile.get).toBe("function");
     expect(typeof caller.profile.upsert).toBe("function");
+    expect(typeof caller.profile.uploadAvatar).toBe("function");
   });
 
   it("workout router has all required procedures", () => {
@@ -124,10 +125,11 @@ describe("VYRO App Router", () => {
     expect(typeof caller.gamification.getLeaderboard).toBe("function");
   });
 
-  it("social router has all required procedures", () => {
+  it("social router has persisted feed, sharing, and engagement procedures", () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
     expect(typeof caller.social.getFeed).toBe("function");
+    expect(typeof caller.social.createPost).toBe("function");
     expect(typeof caller.social.likeItem).toBe("function");
     expect(typeof caller.social.getMyLikes).toBe("function");
   });

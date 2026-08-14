@@ -402,3 +402,14 @@
 - [x] Prevent repeat trial activation and show active trial state on Premium
 - [x] Verify Recovery and Appearance Premium gates unlock immediately after activation
 - [x] Add regression tests and complete live browser, TypeScript, and production-build verification
+
+## Phase 44: Profile Picture and Community Sharing
+- [x] Audit profile-picture upload, storage, persistence, and profile rendering
+- [x] Audit workout and progress sharing to the community feed
+- [x] Repair any unavailable upload, sharing, visibility, or feedback paths
+- [x] Add regression tests and verify profile update and community sharing live
+
+## Phase 45: Approved Community Post and Initials Placeholder
+- [x] Publish the user-approved “new pr” community update with the latest workout attached
+- [x] Make the signed-in account initials a reliable temporary profile avatar placeholder
+- [x] Verify the live post and initials placeholder, then run regression checks

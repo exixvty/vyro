@@ -23,6 +23,21 @@ function getLevelTitle(level: number) {
   return LEVEL_TITLES[level] || `Level ${level}`;
 }
 
+function getAvatarInitials(name?: string | null, email?: string | null) {
+  const nameInitials = name
+    ?.trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  if (nameInitials) return nameInitials;
+
+  const emailInitial = email?.trim().charAt(0).toUpperCase();
+  return emailInitial || "V";
+}
+
 type ProfileTab = "fitness" | "gamification";
 
 export default function Profile() {
@@ -32,8 +47,9 @@ export default function Profile() {
   const { data: profile } = trpc.profile.get.useQuery();
   const { data: stats } = trpc.gamification.getStats.useQuery();
   const { data: achievements } = trpc.gamification.getAchievements.useQuery();
+  const utils = trpc.useUtils();
   const [uploading, setUploading] = useState(false);
-  const updateProfilePicture = trpc.profile.upsert.useMutation();
+  const uploadAvatar = trpc.profile.uploadAvatar.useMutation();
 
   const level = stats?.level ?? 1;
   const xp = stats?.xp ?? 0;
@@ -42,30 +58,38 @@ export default function Profile() {
   const nextLevelXP = xpForLevel(level);
   const progress = Math.min(100, ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100);
 
-  const initials = user?.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "?";
+  const initials = getAvatarInitials(user?.name, user?.email);
 
   const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const acceptedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!acceptedTypes.includes(file.type)) {
+      toast.error("Choose a JPG, PNG, or WebP image");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Profile pictures must be 5 MB or smaller");
+      return;
+    }
+
     setUploading(true);
     try {
-      // Upload to S3 via manus-upload-file
-      const formData = new FormData();
-      formData.append("file", file);
-      
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Unable to read image"));
+        reader.readAsDataURL(file);
       });
-      
-      if (!response.ok) throw new Error("Upload failed");
-      const { url } = await response.json();
-      
-      // Update local profile with new avatar
-      await updateProfilePicture.mutateAsync({});
-      // Invalidate profile query to refetch
-      trpc.useUtils().profile.get.invalidate();
+      const imageBase64 = dataUrl.split(",")[1];
+      if (!imageBase64) throw new Error("Unable to read image");
+
+      await uploadAvatar.mutateAsync({
+        imageBase64,
+        mimeType: file.type as "image/jpeg" | "image/png" | "image/webp",
+      });
+      await utils.profile.get.invalidate();
       toast.success("Profile picture updated!");
     } catch (error) {
       console.error("Upload failed:", error);
@@ -99,11 +123,11 @@ export default function Profile() {
                   className="w-16 h-16 rounded-2xl object-cover"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
+                <div aria-label={`${user?.name || "VYRO athlete"} initials`} className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
                   <span className="text-2xl font-display font-bold text-primary">{initials}</span>
                 </div>
               )}
-              <label className="absolute inset-0 rounded-2xl bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              <label aria-label="Upload profile picture" className="absolute inset-0 rounded-2xl bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                 <Upload size={20} className="text-white" />
                 <input
                   type="file"
