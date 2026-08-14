@@ -424,3 +424,12 @@
 ## Phase 47: Official Deployment Visibility
 - [x] Compare the official VYRO domain with the latest saved release
 - [x] Confirm the publishing action required for the current checkpoint
+
+## Phase 48: Published Manus Element Provenance Audit
+- [x] Identify the exact source of the Made with Manus watermark without modifying code or configuration
+- [x] Identify the exact source of the Make signing up easy link without modifying code or configuration
+
+## Phase 49: Android Trusted Web Activity Readiness Audit
+- [x] Inspect manifest, start URL, scope, display mode, icons, and service worker without modifying files
+- [x] Verify current HTTPS availability, hosted authentication redirects, and Digital Asset Links route behavior
+- [x] Determine whether Manus hosting can serve `/.well-known/assetlinks.json` and identify TWA packaging blockers
