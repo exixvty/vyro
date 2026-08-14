@@ -6,12 +6,24 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
 
-export async function setupVite(app: Express, server: Server) {
-  const serverOptions = {
-    middlewareMode: true,
-    hmr: { server },
+export function createViteServerOptions(server: Server) {
+  const isManagedPreview = Boolean(process.env.MANUS_WEBDEV_PROJECT_ID);
+
+  return {
+    middlewareMode: true as const,
+    hmr: {
+      server,
+      // The browser reaches managed previews through HTTPS on port 443 while
+      // Vite runs on an internal port. Pin the client side to the proxy port
+      // so it does not fall back to unreachable localhost:5173.
+      ...(isManagedPreview ? { clientPort: 443 } : {}),
+    },
     allowedHosts: true as const,
   };
+}
+
+export async function setupVite(app: Express, server: Server) {
+  const serverOptions = createViteServerOptions(server);
 
   const vite = await createViteServer({
     ...viteConfig,

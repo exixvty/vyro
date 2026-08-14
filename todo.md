@@ -445,3 +445,8 @@
 - [x] Add route regression coverage for exact path, HTTP 200, JSON content type, and response data
 - [x] Verify development and production route behavior, TypeScript, and production build
 - [x] Document the unrelated recovery-notification source assertion as intentionally untouched under the no-service-worker-change requirement
+
+## Phase 52: Vite HMR WebSocket Reliability
+- [x] Diagnose the development-preview WebSocket connection failure reported on `/dashboard?from_webdev=1`
+- [x] Apply the minimal development-only Vite HMR configuration fix without altering production behavior
+- [x] Add regression coverage and verify the browser no longer reports a failed Vite WebSocket connection
