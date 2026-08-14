@@ -6,10 +6,17 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
+import {
+  shouldRegisterServiceWorker,
+  unregisterDevelopmentServiceWorkers,
+} from "./lib/serviceWorkerLifecycle";
 import "./index.css";
 
-// Register service worker for PWA
-if ('serviceWorker' in navigator) {
+const supportsServiceWorker = "serviceWorker" in navigator;
+
+// Production keeps the PWA offline experience. Development unregisters any
+// prior worker so cache-first asset handling cannot serve stale Vite modules.
+if (shouldRegisterServiceWorker(import.meta.env.DEV, supportsServiceWorker)) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
@@ -22,6 +29,10 @@ if ('serviceWorker' in navigator) {
       .catch((error) => {
         console.error('[PWA] Service worker registration failed:', error);
       });
+  });
+} else if (import.meta.env.DEV && supportsServiceWorker) {
+  void unregisterDevelopmentServiceWorkers(navigator.serviceWorker).catch((error) => {
+    console.warn('[PWA] Development service-worker cleanup failed:', error);
   });
 }
 

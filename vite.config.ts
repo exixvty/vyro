@@ -161,11 +161,17 @@ const plugins = [
 export default defineConfig({
   plugins,
   resolve: {
+    // tRPC, React DOM, and the Manus runtime must share one React dispatcher
+    // in the Vite preview to avoid invalid-hook-call failures after re-optimization.
+    dedupe: ["react", "react-dom"],
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
     },
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "@trpc/react-query"],
   },
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),

@@ -39,8 +39,8 @@ describe("recovery notifications", () => {
     const serviceWorker = readFileSync(resolve(process.cwd(), "client/public/sw.js"), "utf8");
 
     expect(serviceWorker).toContain("Array.isArray(data.actions)");
-    expect(serviceWorker).toContain("event.action === 'log_urge'");
-    expect(serviceWorker).toContain("event.action === 'support'");
+    expect(serviceWorker).toContain('event.action === "log_urge"');
+    expect(serviceWorker).toContain('event.action === "support"');
   });
 
   it("shows the latest craving-alert time and handles the log-urge deep link in Recovery", () => {

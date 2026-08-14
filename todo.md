@@ -450,3 +450,9 @@
 - [x] Diagnose the development-preview WebSocket connection failure reported on `/dashboard?from_webdev=1`
 - [x] Apply the minimal development-only Vite HMR configuration fix without altering production behavior
 - [x] Add regression coverage and verify the browser no longer reports a failed Vite WebSocket connection
+
+## Phase 53: Development Preview Runtime Repair
+- [x] Diagnose the newly reported Vite WebSocket fallback and React invalid-hook-call errors on `/dashboard?from_webdev=1`
+- [x] Repair development dependency resolution and HMR configuration without altering production behavior
+- [x] Add regression coverage and verify the dashboard renders without Vite or React hook errors
+- [x] Align the stale recovery-notification source assertion with the unchanged service-worker implementation so the full regression suite reflects actual behavior
