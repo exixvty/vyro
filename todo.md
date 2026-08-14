@@ -433,3 +433,8 @@
 - [x] Inspect manifest, start URL, scope, display mode, icons, and service worker without modifying files
 - [x] Verify current HTTPS availability, hosted authentication redirects, and Digital Asset Links route behavior
 - [x] Determine whether Manus hosting can serve `/.well-known/assetlinks.json` and identify TWA packaging blockers
+
+## Phase 50: Manus Space Digital Asset Links Hosting Investigation
+- [x] Inspect the deployed well-known endpoint and current VYRO static routing without changing behavior
+- [x] Research supported Manus Space mechanisms for static dotfiles, explicit routing, and JSON content headers
+- [x] Determine whether any option can make the endpoint valid while leaving the current deployment unchanged
