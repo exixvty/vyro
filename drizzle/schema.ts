@@ -219,6 +219,8 @@ export const activityFeed = mysqlTable("activity_feed", {
   metadata: json("metadata"),
   likesCount: int("likesCount").default(0).notNull(),
   isPublic: boolean("isPublic").default(true).notNull(),
+  audience: mysqlEnum("audience", ["public", "friends", "private"]).default("public").notNull(),
+  privateNotes: text("privateNotes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

@@ -14,6 +14,7 @@ import { notificationsRouter } from "./routers/notifications";
 import { recoveryRouter } from "./routers/recovery";
 import { calculatePremiumAccess, getPremiumAccess, getTrialEndDate } from "./premiumAccess";
 import { storagePut } from "./storage";
+import { TRPCError } from "@trpc/server";
 
 import {
   userProfiles,
@@ -36,7 +37,31 @@ import {
   referralCodes,
   themePreferences,
 } from "../drizzle/schema";
-import { eq, and, desc, sql, inArray, or, ne } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, or, ne, gte } from "drizzle-orm";
+
+async function getAcceptedFriendIds(db: any, userId: number) {
+  const connections = await db
+    .select({ userId: friendships.userId, friendId: friendships.friendId })
+    .from(friendships)
+    .where(and(
+      eq(friendships.status, "accepted"),
+      or(eq(friendships.userId, userId), eq(friendships.friendId, userId))
+    ));
+
+  return connections.map((connection: { userId: number; friendId: number }) =>
+    connection.userId === userId ? connection.friendId : connection.userId
+  );
+}
+
+function canViewActivity(
+  item: { userId: number; audience: "public" | "friends" | "private" },
+  viewerId: number,
+  friendIds: number[]
+) {
+  return item.userId === viewerId
+    || item.audience === "public"
+    || (item.audience === "friends" && friendIds.includes(item.userId));
+}
 
 // ─── Profile Router ───────────────────────────────────────────────────────────
 const profileRouter = router({
@@ -802,10 +827,13 @@ const gamificationRouter = router({
 // ─── Social Router ────────────────────────────────────────────────────────────
 const socialRouter = router({
   getFeed: protectedProcedure
-    .input(z.object({ limit: z.number().default(20) }))
+    .input(z.object({ limit: z.number().min(1).max(50).default(20) }))
     .query(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) return [];
+      const friendIds = await getAcceptedFriendIds(db, ctx.user.id);
+      const visibleFriends = friendIds.length > 0 ? friendIds : [-1];
+
       return db
         .select({
           id: activityFeed.id,
@@ -813,6 +841,8 @@ const socialRouter = router({
           title: activityFeed.title,
           description: activityFeed.description,
           metadata: activityFeed.metadata,
+          privateNotes: sql<string | null>`CASE WHEN ${activityFeed.userId} = ${ctx.user.id} THEN ${activityFeed.privateNotes} ELSE NULL END`,
+          audience: activityFeed.audience,
           likesCount: activityFeed.likesCount,
           createdAt: activityFeed.createdAt,
           userId: activityFeed.userId,
@@ -822,102 +852,133 @@ const socialRouter = router({
         .from(activityFeed)
         .leftJoin(users, eq(activityFeed.userId, users.id))
         .leftJoin(userProfiles, eq(activityFeed.userId, userProfiles.userId))
-        .where(eq(activityFeed.isPublic, true))
+        .where(or(
+          eq(activityFeed.userId, ctx.user.id),
+          eq(activityFeed.audience, "public"),
+          and(eq(activityFeed.audience, "friends"), inArray(activityFeed.userId, visibleFriends))
+        ))
         .orderBy(desc(activityFeed.createdAt))
         .limit(input.limit);
     }),
 
+  getShareOptions: protectedProcedure
+    .input(z.object({ sessionId: z.number().int().positive() }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("DB unavailable");
+      const sessions = await db
+        .select({ id: workoutSessions.id, completedAt: workoutSessions.completedAt })
+        .from(workoutSessions)
+        .where(and(eq(workoutSessions.id, input.sessionId), eq(workoutSessions.userId, ctx.user.id)))
+        .limit(1);
+      const session = sessions[0];
+      if (!session) throw new TRPCError({ code: "NOT_FOUND", message: "Workout session not found" });
+
+      const sessionDay = session.completedAt.toISOString().slice(0, 10);
+      const [eligibleAchievements, eligiblePersonalRecords] = await Promise.all([
+        db.select().from(achievements).where(and(eq(achievements.userId, ctx.user.id), gte(achievements.earnedAt, session.completedAt))),
+        db.select().from(personalRecords).where(and(eq(personalRecords.userId, ctx.user.id), gte(personalRecords.recordDate, sessionDay))),
+      ]);
+
+      return { achievements: eligibleAchievements, personalRecords: eligiblePersonalRecords };
+    }),
+
   createPost: protectedProcedure
     .input(z.object({
-      content: z.string().trim().min(1).max(500),
-      sessionId: z.number().int().positive().optional(),
+      sessionId: z.number().int().positive(),
+      title: z.string().trim().min(1).max(300),
+      publicReflection: z.string().trim().min(1).max(500),
+      privateNotes: z.string().trim().max(2000).optional(),
+      difficulty: z.enum(["easy", "moderate", "challenging", "max_effort"]),
+      audience: z.enum(["public", "friends", "private"]),
+      achievementIds: z.array(z.number().int().positive()).max(10).default([]),
+      personalRecordIds: z.array(z.number().int().positive()).max(10).default([]),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("DB unavailable");
+      const sessions = await db
+        .select()
+        .from(workoutSessions)
+        .where(and(eq(workoutSessions.id, input.sessionId), eq(workoutSessions.userId, ctx.user.id)))
+        .limit(1);
+      const session = sessions[0];
+      if (!session) throw new TRPCError({ code: "NOT_FOUND", message: "Workout session not found" });
 
-      let metadata: Record<string, unknown> | null = null;
-      let title = "Shared a training update";
-
-      if (input.sessionId) {
-        const sessions = await db
-          .select()
-          .from(workoutSessions)
-          .where(and(eq(workoutSessions.id, input.sessionId), eq(workoutSessions.userId, ctx.user.id)))
-          .limit(1);
-        const session = sessions[0];
-        if (!session) throw new Error("Workout session not found");
-
-        title = `Completed ${session.title}`;
-        metadata = {
-          workoutSessionId: session.id,
-          title: session.title,
-          durationMinutes: session.durationMinutes,
-          caloriesBurned: session.caloriesBurned,
-        };
+      const sessionDay = session.completedAt.toISOString().slice(0, 10);
+      const [selectedAchievements, selectedPersonalRecords] = await Promise.all([
+        input.achievementIds.length > 0
+          ? db.select().from(achievements).where(and(eq(achievements.userId, ctx.user.id), inArray(achievements.id, input.achievementIds), gte(achievements.earnedAt, session.completedAt)))
+          : Promise.resolve([]),
+        input.personalRecordIds.length > 0
+          ? db.select().from(personalRecords).where(and(eq(personalRecords.userId, ctx.user.id), inArray(personalRecords.id, input.personalRecordIds), gte(personalRecords.recordDate, sessionDay)))
+          : Promise.resolve([]),
+      ]);
+      if (selectedAchievements.length !== input.achievementIds.length || selectedPersonalRecords.length !== input.personalRecordIds.length) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only achievements and PRs eligible for this workout can be shared" });
       }
 
+      const metadata = {
+        workoutSessionId: session.id,
+        workoutTitle: session.title,
+        durationMinutes: session.durationMinutes,
+        caloriesBurned: session.caloriesBurned,
+        difficulty: input.difficulty,
+        achievements: selectedAchievements.map((achievement) => ({ id: achievement.id, name: achievement.badgeName, icon: achievement.badgeIcon })),
+        personalRecords: selectedPersonalRecords.map((record) => ({ id: record.id, exerciseName: record.exerciseName, value: record.value, unit: record.unit })),
+      };
       const [result] = await db.insert(activityFeed).values({
         userId: ctx.user.id,
         type: "workout_completed",
-        title,
-        description: input.content,
+        title: input.title,
+        description: input.publicReflection,
+        privateNotes: input.privateNotes || null,
         metadata,
-        isPublic: true,
+        audience: input.audience,
+        isPublic: input.audience === "public",
       });
 
-      return { id: Number(result.insertId) };
+      return { id: Number(result.insertId), audience: input.audience };
     }),
 
   likeItem: protectedProcedure
-    .input(z.object({ feedItemId: z.number() }))
+    .input(z.object({ feedItemId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("DB unavailable");
+      const posts = await db
+        .select({ userId: activityFeed.userId, audience: activityFeed.audience })
+        .from(activityFeed)
+        .where(eq(activityFeed.id, input.feedItemId))
+        .limit(1);
+      const post = posts[0];
+      if (!post) throw new TRPCError({ code: "NOT_FOUND", message: "Community post not found" });
+      const friendIds = await getAcceptedFriendIds(db, ctx.user.id);
+      if (!canViewActivity(post, ctx.user.id, friendIds)) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "This post is private" });
+      }
 
       const existing = await db
         .select()
         .from(feedLikes)
-        .where(
-          and(
-            eq(feedLikes.feedItemId, input.feedItemId),
-            eq(feedLikes.userId, ctx.user.id)
-          )
-        )
+        .where(and(eq(feedLikes.feedItemId, input.feedItemId), eq(feedLikes.userId, ctx.user.id)))
         .limit(1);
-
       if (existing.length > 0) {
-        await db
-          .delete(feedLikes)
-          .where(
-            and(
-              eq(feedLikes.feedItemId, input.feedItemId),
-              eq(feedLikes.userId, ctx.user.id)
-            )
-          );
-        await db
-          .update(activityFeed)
-          .set({ likesCount: sql`GREATEST(likesCount - 1, 0)` })
-          .where(eq(activityFeed.id, input.feedItemId));
+        await db.delete(feedLikes).where(and(eq(feedLikes.feedItemId, input.feedItemId), eq(feedLikes.userId, ctx.user.id)));
+        await db.update(activityFeed).set({ likesCount: sql`GREATEST(likesCount - 1, 0)` }).where(eq(activityFeed.id, input.feedItemId));
         return { liked: false };
       }
 
       await db.insert(feedLikes).values({ feedItemId: input.feedItemId, userId: ctx.user.id });
-      await db
-        .update(activityFeed)
-        .set({ likesCount: sql`likesCount + 1` })
-        .where(eq(activityFeed.id, input.feedItemId));
+      await db.update(activityFeed).set({ likesCount: sql`likesCount + 1` }).where(eq(activityFeed.id, input.feedItemId));
       return { liked: true };
     }),
 
   getMyLikes: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) return [];
-    const result = await db
-      .select({ feedItemId: feedLikes.feedItemId })
-      .from(feedLikes)
-      .where(eq(feedLikes.userId, ctx.user.id));
-    return result.map((r) => r.feedItemId);
+    const result = await db.select({ feedItemId: feedLikes.feedItemId }).from(feedLikes).where(eq(feedLikes.userId, ctx.user.id));
+    return result.map((row) => row.feedItemId);
   }),
 });
 

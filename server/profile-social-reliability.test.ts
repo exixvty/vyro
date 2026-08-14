@@ -31,12 +31,15 @@ describe("profile picture and community sharing reliability", () => {
     expect(profilePage).not.toContain("fetch(\"/api/upload\"");
   });
 
-  it("creates only authenticated, persisted community posts and validates attached workout ownership", () => {
+  it("creates only authenticated rich workout posts and validates attached workout ownership", () => {
     expect(router).toContain("createPost: protectedProcedure");
-    expect(router).toContain("content: z.string().trim().min(1).max(500)");
+    expect(router).toContain("title: z.string().trim().min(1).max(300)");
+    expect(router).toContain("publicReflection: z.string().trim().min(1).max(500)");
+    expect(router).toContain("audience: z.enum([\"public\", \"friends\", \"private\"])");
+    expect(router).toContain("privateNotes: input.privateNotes || null");
     expect(router).toContain("eq(workoutSessions.userId, ctx.user.id)");
     expect(router).toContain("await db.insert(activityFeed).values({");
-    expect(router).toContain("isPublic: true");
+    expect(router).toContain("isPublic: input.audience === \"public\"");
     expect(router).toContain("avatarUrl: userProfiles.avatarUrl");
   });
 
@@ -44,7 +47,7 @@ describe("profile picture and community sharing reliability", () => {
     expect(socialPage).toContain("trpc.social.getFeed.useQuery");
     expect(socialPage).toContain("trpc.social.createPost.useMutation");
     expect(socialPage).toContain("trpc.social.likeItem.useMutation");
-    expect(socialPage).toContain("Create your first post");
+    expect(socialPage).toContain("Create a workout post");
     expect(socialPage).not.toContain("SAMPLE_POSTS");
     expect(socialPage).not.toContain("setPosts(");
   });

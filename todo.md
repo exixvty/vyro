@@ -413,3 +413,10 @@
 - [x] Publish the user-approved “new pr” community update with the latest workout attached
 - [x] Make the signed-in account initials a reliable temporary profile avatar placeholder
 - [x] Verify the live post and initials placeholder, then run regression checks
+
+## Phase 46: Privacy-Aware Advanced Workout Sharing
+- [x] Audit workout history, personal-record, achievement, friendship, and feed data contracts
+- [x] Add a selectable workout-history attachment with title, difficulty, public reflection, and private notes
+- [x] Support showcasing eligible achievements and PRs from the selected workout
+- [x] Add public, friends-only, and only-me audiences and enforce visibility server-side
+- [x] Add regression tests and verify each sharing audience and visibility behavior live
