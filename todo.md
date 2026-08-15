@@ -461,3 +461,8 @@
 - [x] Serve the existing VYRO manifest directly at `GET /manifest.webmanifest` before the SPA fallback
 - [x] Preserve manifest contents exactly and return the appropriate manifest JSON content type
 - [x] Add regression coverage and verify the endpoint in production mode, TypeScript, build, and full tests
+
+## Phase 55: Live Manus Space Manifest Deployment Investigation
+- [x] Verify the live response and headers for `/manifest.webmanifest` on all published VYRO domains
+- [x] Determine whether the latest manifest endpoint checkpoint reached the published deployment
+- [x] Identify whether Manus Space edge routing bypasses the application route without modifying code or publishing state
