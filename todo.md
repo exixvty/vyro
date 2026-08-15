@@ -456,3 +456,8 @@
 - [x] Repair development dependency resolution and HMR configuration without altering production behavior
 - [x] Add regression coverage and verify the dashboard renders without Vite or React hook errors
 - [x] Align the stale recovery-notification source assertion with the unchanged service-worker implementation so the full regression suite reflects actual behavior
+
+## Phase 54: Bubblewrap Web Manifest Endpoint
+- [x] Serve the existing VYRO manifest directly at `GET /manifest.webmanifest` before the SPA fallback
+- [x] Preserve manifest contents exactly and return the appropriate manifest JSON content type
+- [x] Add regression coverage and verify the endpoint in production mode, TypeScript, build, and full tests

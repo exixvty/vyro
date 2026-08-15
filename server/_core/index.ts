@@ -12,6 +12,10 @@ import {
   DIGITAL_ASSET_LINKS_PATH,
   digitalAssetLinksHandler,
 } from "../config/digitalAssetLinks";
+import {
+  WEB_MANIFEST_PATH,
+  webManifestHandler,
+} from "../config/webManifest";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -53,6 +57,9 @@ async function startServer() {
   // This must stay before Vite and production static middleware, both of which
   // otherwise send the SPA document for unmatched dot-prefixed paths.
   app.get(DIGITAL_ASSET_LINKS_PATH, digitalAssetLinksHandler);
+  // Bubblewrap requests this conventional path. It must be resolved before
+  // Vite and static SPA fallbacks so it never returns index.html.
+  app.get(WEB_MANIFEST_PATH, webManifestHandler);
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
