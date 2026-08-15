@@ -1,0 +1,74 @@
+{
+  "packageId": "com.vyrofit.app",
+  "host": "vyrofit.manus.space",
+  "name": "VYRO — All-in-One Fitness App",
+  "launcherName": "VYRO",
+  "display": "standalone",
+  "themeColor": "#000000",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#000000",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://vyrofit.manus.space/icons/icon-512.png",
+  "maskableIconUrl": "https://vyrofit.manus.space/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "/workspaces/vyro/android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Start Workout",
+      "shortName": "Workout",
+      "url": "https://vyrofit.manus.space/workout",
+      "chosenIconUrl": "https://vyrofit.manus.space/icons/icon-192.png"
+    },
+    {
+      "name": "Log Nutrition",
+      "shortName": "Nutrition",
+      "url": "https://vyrofit.manus.space/nutrition",
+      "chosenIconUrl": "https://vyrofit.manus.space/icons/icon-192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://vyrofit.manus.space/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {
+    "playBilling": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://vyrofit.manus.space/",
+  "minSdkVersion": 23,
+  "shareTarget": {
+    "action": "https://vyrofit.manus.space/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "orientation": "portrait-primary",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1"
+}
