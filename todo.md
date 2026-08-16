@@ -466,3 +466,13 @@
 - [x] Verify the live response and headers for `/manifest.webmanifest` on all published VYRO domains
 - [x] Determine whether the latest manifest endpoint checkpoint reached the published deployment
 - [x] Identify whether Manus Space edge routing bypasses the application route without modifying code or publishing state
+
+## Phase 56: Bubblewrap Play Billing Minimum SDK
+- [ ] Locate the Bubblewrap-generated Android project and inspect its SDK, package, version, and signing configuration
+- [ ] Raise only the Android minSdkVersion to 23 for the Google Play Billing dependency
+- [ ] Verify the Android configuration and confirm the VYRO production web application remains unchanged
+
+## Phase 57: Live Digital Asset Links Release Investigation
+- [x] Verify the local source/build statement and published response on all VYRO domains
+- [x] Compare the deployed application fingerprint with the current server artifact and GitHub state
+- [x] Identify why production still serves the empty array without changing Android identity or deployment configuration
