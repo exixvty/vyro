@@ -504,3 +504,9 @@
 - [x] Identify the exact provenance of published Made with Manus branding and any VYRO-source references
 - [x] Assess identity, database, subscription, and stored-data dependencies that a future authentication migration must preserve
 - [x] Document future branding/authentication change requirements without modifying code or platform settings
+
+## Phase 63: Manus Dependency and Portability Audit
+- [x] Inventory Manus-specific authentication, environment, API, storage, analytics, SDK, and runtime dependencies
+- [x] Audit hosting, deployment, static routing, background-job, and platform-injection assumptions
+- [x] Inspect existing Android configuration and APK endpoint expectations without modifying signing or project files
+- [x] Classify every identified dependency as independent, configuration-required, or replacement-required
