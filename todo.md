@@ -510,3 +510,8 @@
 - [x] Audit hosting, deployment, static routing, background-job, and platform-injection assumptions
 - [x] Inspect existing Android configuration and APK endpoint expectations without modifying signing or project files
 - [x] Classify every identified dependency as independent, configuration-required, or replacement-required
+
+## Phase 64: Detailed Manus Dependency Replacement Map
+- [x] Map every Manus dependency to exact source files, environment variables, endpoints, and affected database tables
+- [x] Identify all hard-coded Manus URLs, Space hosting assumptions, and Android host dependencies
+- [x] Specify the minimum independent replacement work and data-preservation constraints for each dependency
