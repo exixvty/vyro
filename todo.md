@@ -515,3 +515,8 @@
 - [x] Map every Manus dependency to exact source files, environment variables, endpoints, and affected database tables
 - [x] Identify all hard-coded Manus URLs, Space hosting assumptions, and Android host dependencies
 - [x] Specify the minimum independent replacement work and data-preservation constraints for each dependency
+
+## Phase 65: Minimum-Cost Independent Staging Architecture
+- [x] Research current low-cost providers for hosting, database, storage, authentication, AI, maps, scheduling, and owner notifications
+- [x] Map each recommended provider to the current VYRO Manus dependency and required configuration change
+- [x] Define a staged cutover that preserves Drizzle, Express/tRPC paths, frontend behavior, user data, and Android compatibility
